@@ -16,5 +16,3 @@ logging.basicConfig(
     ]
 )
 
-print("hello world")
-logging.info("hello printed")
