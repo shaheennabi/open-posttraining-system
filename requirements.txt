@@ -1,2 +1,3 @@
 huggingface_hub
 notebook
+Pathlib
