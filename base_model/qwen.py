@@ -1,6 +1,7 @@
 
 import torch
-from logger import logger
+import logging
+from logger import logging
 
 ## rope
 
@@ -105,7 +106,7 @@ class GroupQueryAttention(nn.Module):
     def forward(self, x, cos, sin, mask, cache=None):
         b, t, _ = x.shape
 
-        logger.debug("GQA forward b=%s t=%s cache=%s", b, t, cache is not None)
+        logging.debug("GQA forward b=%s t=%s cache=%s", b, t, cache is not None)
         query = self.w_query(x)   ## x = (b, t, d_in)   -->  (b, t, num_heads * h_dim)
         keys = self.w_keys(x)    ## x = (b, t, d_in)  --> (b, t, kv_heads * h_dim)
         values = self.w_values(x)   ## x = (b, t, d_in) --> (b, t, kv_heads * h_dim)
@@ -256,7 +257,7 @@ class Qwen3Model(nn.Module):
     
 
         self.cfg = cfg
-        logger.info("Initializing Qwen3Model vocab_size=%s emb_dim=%s n_layers=%s", cfg["vocab_size"], cfg["emb_dim"], cfg["n_layers"])
+        logging.info("Initializing Qwen3Model vocab_size=%s emb_dim=%s n_layers=%s", cfg["vocab_size"], cfg["emb_dim"], cfg["n_layers"])
 
         if cfg["head_dim"] is None: 
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
@@ -276,7 +277,7 @@ class Qwen3Model(nn.Module):
 
     
     def forward(self, in_ids, cache=None):
-        logger.info("Qwen3Model forward start input_ids=%s cache=%s", in_ids.shape, cache is not None)
+        logging.info("Qwen3Model forward start input_ids=%s cache=%s", in_ids.shape, cache is not None)
         token_emb = self.emb(in_ids)
         x = token_emb   ##(b,t,emb_dim)
 
@@ -317,12 +318,12 @@ class Qwen3Model(nn.Module):
         x = self.final_norm(x) ## shape = (b,t,emb_dim)
 
         logits = self.out_head(x.to(self.cfg["dtype"]))  ### (b,t,emb_dim)  ---> (b,t, vocab_size)
-        logger.info("Qwen3Model forward end logits=%s", logits.shape)
+        logging.info("Qwen3Model forward end logits=%s", logits.shape)
         return logits 
     
     def reset_kv_cache(self):
         self.current_position = 0  ## must be called, when starting a new independent sequence
-        logger.info("KV cache reset")
+        logging.info("KV cache reset")
     
 
 
@@ -521,7 +522,7 @@ def load_hf_weights_into_qwen(model, param_config, params):
         model.out_head.weight = assign(model.out_head.weight, params["lm_head.weight"], "lm_head.weight")
     else:
         model.out_head.weight = model.emb.weight
-        logger.info("Weight tying enabled: output head shares embedding weights")
+        logging.info("Weight tying enabled: output head shares embedding weights")
 
 
 
