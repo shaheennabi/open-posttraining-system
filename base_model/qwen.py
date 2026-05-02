@@ -1,10 +1,6 @@
 
-
-import logging
 import torch
-import logger as log_config
-
-logger = logging.getLogger(__name__)
+from logger import logger
 
 ## rope
 
@@ -260,6 +256,7 @@ class Qwen3Model(nn.Module):
     
 
         self.cfg = cfg
+        logger.info("Initializing Qwen3Model vocab_size=%s emb_dim=%s n_layers=%s", cfg["vocab_size"], cfg["emb_dim"], cfg["n_layers"])
 
         if cfg["head_dim"] is None: 
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
@@ -325,6 +322,7 @@ class Qwen3Model(nn.Module):
     
     def reset_kv_cache(self):
         self.current_position = 0  ## must be called, when starting a new independent sequence
+        logger.info("KV cache reset")
     
 
 
