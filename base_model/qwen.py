@@ -1,7 +1,13 @@
 
 import torch
-import logging
 from logger import logging
+import torch.nn as nn
+import torch.nn.functional as F  
+import re
+from tokenizers import Tokenizer
+from pathlib import Path
+
+
 
 ## rope
 
@@ -165,12 +171,7 @@ class GroupQueryAttention(nn.Module):
         return context, next_cache   ## (b, t, D_model), cache tuple
 
 
-        
-
-import torch
-import torch.nn as nn 
-import torch.nn.functional as F  
-
+    
 
 class FeedForward(nn.Module):
     def  __init__(self, cfg):
@@ -198,8 +199,6 @@ class FeedForward(nn.Module):
 
 
 ## transformer block 
-import torch
-import torch.nn as nn
 
 class TransformerBlock(nn.Module):
     def __init__(self, cfg):
@@ -240,8 +239,6 @@ class TransformerBlock(nn.Module):
 
 
 ## this is the block here ...
-import torch
-import torch.nn as nn
 
 class Qwen3Model(nn.Module):
     def __init__(self, cfg):
@@ -348,9 +345,6 @@ class KVCache:
 
 
 
-import re
-from tokenizers import Tokenizer
-from pathlib import Path
 
 class Qwen3Tokenizer:
     _SPECIALS = [

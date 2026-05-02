@@ -1,0 +1,19 @@
+[project]
+name = "open_posttraining_system"
+version = "0.1.0"
+description = "Post-training system for reasoning models"
+authors = [{name = "Shaheen Nabi"}]
+dependencies = [
+    "torch",
+    "transformers",
+    "huggingface_hub>=0.23.0",
+    "tokenizers",
+    "from-root",
+]
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["logger*", "test*"]
