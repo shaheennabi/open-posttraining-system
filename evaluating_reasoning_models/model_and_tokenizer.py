@@ -1,14 +1,11 @@
 from pathlib import Path
 import sys
 
-ROOT_DIR = Path.cwd().parent  # Get parent of current directory
+ROOT_DIR = Path.cwd().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from downloading_the_base_model.download_model import download_model
-
-download_model("devshaheen/qwen3.5_0.6B_rlvr_grpo_run_33_steps", "qwen")  ## this is change later
-
 
 import torch
 from safetensors.torch import load_file
@@ -23,8 +20,22 @@ from base_model.qwen import (
 model_dir = Path.cwd() / "qwen"
 
 
-# def main(prompt):
-def load_model_and_tokenizer(which_model, use_compile):
+def load_model_and_tokenizer(
+    which_model,
+    use_compile,
+    load_rlvr_checkpoint=False,
+):
+
+    if load_rlvr_checkpoint:
+        download_model(
+            "devshaheen/qwen3.5_0.6B_rlvr_grpo_run_5_steps",
+            "qwen",
+        )
+    else:
+        download_model(
+            "Qwen/Qwen3-0.6B",
+            "qwen",
+        )
 
     if which_model == "base":
         tokenizer = Qwen3Tokenizer(
@@ -46,26 +57,37 @@ def load_model_and_tokenizer(which_model, use_compile):
         raise ValueError("Not a valid model type")
 
     model = Qwen3Model(QWEN_CONFIG_06_B)
-    
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    # Try to load from .pth checkpoint first, then fall back to safetensors
-    checkpoint_path = model_dir / "qwen3-0.6B-rlvr-grpo-step00033-interrupt.pth"
-    if checkpoint_path.exists():
-        print(f"Loading checkpoint from: {checkpoint_path}")
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        
-        # If checkpoint is a dict with 'model' key, extract it
-        if isinstance(checkpoint, dict) and 'model' in checkpoint:
-            state_dict = checkpoint['model']
-        else:
-            state_dict = checkpoint
-        
-        # Load state dict into model
-        model.load_state_dict(state_dict, strict=False)
+    if load_rlvr_checkpoint:
+
+        checkpoint_path = (
+            model_dir /
+            "qwen3-0.6B-rlvr-grpo-step00005.safetensors"
+        )
+
+        print(f"\nLoading RLVR checkpoint: {checkpoint_path}")
+
+        state_dict = load_file(str(checkpoint_path))
+
+        missing, unexpected = model.load_state_dict(
+            state_dict,
+            strict=False,
+        )
+
+        print(f"Loaded {len(state_dict)} tensors")
+        print(f"Missing keys: {len(missing)}")
+        print(f"Unexpected keys: {len(unexpected)}")
+
     else:
-        # Fall back to loading from safetensors
-        weights = load_file(model_dir / "model.safetensors")
+
+        print("\nLoading base Qwen weights")
+
+        weights = load_file(
+            str(model_dir / "model.safetensors")
+        )
+
         load_hf_weights_into_qwen(
             model,
             param_config={
