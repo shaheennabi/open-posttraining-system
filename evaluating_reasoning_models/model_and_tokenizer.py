@@ -28,7 +28,7 @@ def load_model_and_tokenizer(
 
     if load_rlvr_checkpoint:
         download_model(
-            "devshaheen/qwen3.5_0.6B_rlvr_grpo_run_5_steps",
+            "devshaheen/qwen3.5_0.6B_rlvr_grpo_checkpoints",
             "qwen",
         )
     else:
@@ -64,7 +64,7 @@ def load_model_and_tokenizer(
 
         checkpoint_path = (
             model_dir /
-            "qwen3-0.6B-rlvr-grpo-step00005.safetensors"
+            "qwen3-0.6B-rlvr-grpo-step00050.safetensors"
         )
 
         print(f"\nLoading RLVR checkpoint: {checkpoint_path}")

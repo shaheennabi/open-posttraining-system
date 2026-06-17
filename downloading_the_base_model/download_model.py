@@ -10,7 +10,8 @@ def download_model(repo_id="Qwen/Qwen3-0.6B", local_dir="qwen"):
         allow_patterns=[
             "config.json",
             "model.safetensors",
-            "qwen3-0.6B-rlvr-grpo-step00005.safetensors",
+            #"qwen3-0.6B-rlvr-grpo-step00005.safetensors",
+            "qwen3-0.6B-rlvr-grpo-step00050.safetensors",
             "tokenizer.json",
             "tokenizer_config.json",
         ]
