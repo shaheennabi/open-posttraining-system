@@ -1,6 +1,7 @@
 import argparse
 import csv
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -22,6 +23,40 @@ from evaluating_reasoning_models.model_and_tokenizer import load_model_and_token
 
 
 DEFAULT_DATASET_PATH = ROOT_DIR / "evaluating_reasoning_models" / "math500_test.json"
+DEFAULT_CHECKPOINT_PATH = "checkpoints/qwen3-0.6B-rlvr-grpo-step00050.safetensors"
+CHECKPOINT_STEP_RE = re.compile(r"step(\d+)")
+
+
+def infer_step_from_checkpoint_path(path_value):
+    match = CHECKPOINT_STEP_RE.search(str(path_value))
+    return int(match.group(1)) if match else None
+
+
+def discover_checkpoint_paths(checkpoint_glob):
+    pattern = Path(checkpoint_glob)
+    if pattern.is_absolute():
+        search_roots = [pattern.anchor]
+        glob_pattern = str(pattern)[len(pattern.anchor):]
+    else:
+        search_roots = [Path.cwd(), SCRIPT_DIR, ROOT_DIR]
+        glob_pattern = checkpoint_glob
+
+    matches = []
+    for root in search_roots:
+        matches.extend(root.glob(glob_pattern))
+
+    unique_matches = sorted(
+        dict.fromkeys(path.resolve() for path in matches if path.is_file()),
+        key=lambda path: (infer_step_from_checkpoint_path(path) or -1, str(path)),
+    )
+
+    if not unique_matches:
+        raise FileNotFoundError(
+            f"No checkpoints matched --checkpoint_glob {checkpoint_glob!r}"
+        )
+
+    return unique_matches
+
 
 
 def resolve_existing_path(path_value, description):
@@ -230,8 +265,14 @@ def parse_args():
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        required=True,
+        default=DEFAULT_CHECKPOINT_PATH,
         help="Path to a safetensors checkpoint.",
+    )
+    parser.add_argument(
+        "--checkpoint_glob",
+        type=str,
+        default=None,
+        help="Glob for evaluating a series of local checkpoints, for example 'checkpoints/**/*.safetensors'.",
     )
     parser.add_argument(
         "--dataset_size",
@@ -275,47 +316,68 @@ def main():
     if args.dataset_size < 0:
         raise ValueError("--dataset_size must be non-negative")
 
-    try:
-        checkpoint_path = resolve_existing_path(args.checkpoint_path, "Checkpoint")
-    except FileNotFoundError:
-        checkpoint_path = args.checkpoint_path
-        print(
-            f"Checkpoint not found locally for {args.checkpoint_path}; "
-            "the model loader will try to download it from Hugging Face."
-        )
+    if args.checkpoint_glob:
+        checkpoint_paths = discover_checkpoint_paths(args.checkpoint_glob)
+    else:
+        try:
+            checkpoint_paths = [resolve_existing_path(args.checkpoint_path, "Checkpoint")]
+        except FileNotFoundError:
+            checkpoint_paths = [args.checkpoint_path]
+            print(
+                f"Checkpoint not found locally for {args.checkpoint_path}; "
+                "the model loader will try to download it from Hugging Face."
+            )
+
     dataset_path = DEFAULT_DATASET_PATH if DEFAULT_DATASET_PATH.exists() else Path("math500_test.json")
-
-    print(f"Repository root: {ROOT_DIR}")
-    print(f"Loading checkpoint: {checkpoint_path}")
-    print(f"Evaluation step: {args.step}")
-
-    model, tokenizer = load_model_and_tokenizer(
-        which_model="base",
-        use_compile=False,
-        checkpoint_path=checkpoint_path,
-    )
-
-    device = next(model.parameters()).device
-
     math_data = load_math500_test(local_path=dataset_path)
     if args.dataset_size:
         math_data = math_data[: args.dataset_size]
     else:
         math_data = []
 
+    print(f"Repository root: {ROOT_DIR}")
     print(f"Loaded {len(math_data)} MATH-500 examples")
+    print(f"Evaluating {len(checkpoint_paths)} checkpoint(s)")
 
-    evaluate_math500_stream(
-        model=model,
-        tokenizer=tokenizer,
-        device=device,
-        math_data=math_data,
-        step=args.step,
-        out_path=args.out_path,
-        metrics_csv=args.metrics_csv,
-        max_new_tokens=args.max_new_tokens,
-        verbose=args.verbose,
-    )
+    for checkpoint_path in checkpoint_paths:
+        checkpoint_step = infer_step_from_checkpoint_path(checkpoint_path)
+        eval_step = checkpoint_step if checkpoint_step is not None else args.step
+        if eval_step is None:
+            raise ValueError(
+                "Could not infer step from checkpoint name; pass --step explicitly."
+            )
+
+        out_path = args.out_path
+        if out_path is not None and len(checkpoint_paths) > 1:
+            out_path = Path(out_path)
+            out_path = out_path.with_name(
+                f"{out_path.stem}-step{eval_step:05d}{out_path.suffix}"
+            )
+
+        print(f"Loading checkpoint: {checkpoint_path}")
+        print(f"Evaluation step: {eval_step}")
+
+        model, tokenizer = load_model_and_tokenizer(
+            which_model="base",
+            use_compile=False,
+            checkpoint_path=checkpoint_path,
+        )
+
+        device = next(model.parameters()).device
+
+        evaluate_math500_stream(
+            model=model,
+            tokenizer=tokenizer,
+            device=device,
+            math_data=math_data,
+            step=eval_step,
+            out_path=out_path,
+            metrics_csv=args.metrics_csv,
+            max_new_tokens=args.max_new_tokens,
+            verbose=args.verbose,
+        )
+
+        del model
 
 
 if __name__ == "__main__":
