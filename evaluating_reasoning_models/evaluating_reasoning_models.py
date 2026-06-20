@@ -3,7 +3,6 @@ import json
 import re
 import time
 
-import requests
 import torch
 from sympy import simplify
 from sympy.core.sympify import SympifyError

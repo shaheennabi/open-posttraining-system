@@ -9,6 +9,10 @@ dependencies = [
     "huggingface_hub>=0.23.0",
     "tokenizers",
     "from-root",
+    "datasets",
+    "requests",
+    "safetensors",
+    "sympy",
 ]
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
