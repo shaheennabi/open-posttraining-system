@@ -35,10 +35,33 @@ def resolve_existing_path(path_value, description):
             ROOT_DIR / path,
         ]
 
+        if path.parts and path.parts[0] == "checkpoints":
+            checkpoint_name = path.name
+            candidates.extend(
+                [
+                    SCRIPT_DIR / "checkpoints" / "rlvr_grpo_training_with_no_kl" / checkpoint_name,
+                    ROOT_DIR / "improving_grpo_for_reinforcement_learning" / "checkpoints" / checkpoint_name,
+                    ROOT_DIR / "improving_grpo_for_reinforcement_learning" / "checkpoints" / "rlvr_grpo_training_with_no_kl" / checkpoint_name,
+                ]
+            )
+
     unique_candidates = list(dict.fromkeys(candidate.resolve() for candidate in candidates))
     for candidate in unique_candidates:
         if candidate.exists():
             return candidate
+
+    if not path.is_absolute() and path.name:
+        checkpoint_dirs = [
+            SCRIPT_DIR / "checkpoints",
+            ROOT_DIR / "checkpoints",
+            ROOT_DIR / "improving_grpo_for_reinforcement_learning" / "checkpoints",
+        ]
+        for checkpoint_dir in checkpoint_dirs:
+            if not checkpoint_dir.exists():
+                continue
+            matches = sorted(checkpoint_dir.rglob(path.name))
+            if matches:
+                return matches[-1].resolve()
 
     attempted = "\n  - ".join(str(candidate) for candidate in unique_candidates)
     raise FileNotFoundError(
