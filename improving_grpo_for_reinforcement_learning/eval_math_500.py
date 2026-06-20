@@ -275,7 +275,14 @@ def main():
     if args.dataset_size < 0:
         raise ValueError("--dataset_size must be non-negative")
 
-    checkpoint_path = resolve_existing_path(args.checkpoint_path, "Checkpoint")
+    try:
+        checkpoint_path = resolve_existing_path(args.checkpoint_path, "Checkpoint")
+    except FileNotFoundError:
+        checkpoint_path = args.checkpoint_path
+        print(
+            f"Checkpoint not found locally for {args.checkpoint_path}; "
+            "the model loader will try to download it from Hugging Face."
+        )
     dataset_path = DEFAULT_DATASET_PATH if DEFAULT_DATASET_PATH.exists() else Path("math500_test.json")
 
     print(f"Repository root: {ROOT_DIR}")

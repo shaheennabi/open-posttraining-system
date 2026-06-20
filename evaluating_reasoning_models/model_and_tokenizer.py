@@ -77,8 +77,22 @@ def load_model_and_tokenizer(
                 checkpoint_path = ROOT_DIR / checkpoint_path
 
         if not checkpoint_path.exists():
+            print(
+                f"Checkpoint not found locally at {checkpoint_path}. "
+                "Downloading RLVR checkpoint files from Hugging Face..."
+            )
+            download_model(
+                "devshaheen/qwen3.5_0.6B_rlvr_grpo_checkpoints",
+                str(model_dir),
+            )
+
+            downloaded_checkpoint = model_dir / checkpoint_path.name
+            if downloaded_checkpoint.exists():
+                checkpoint_path = downloaded_checkpoint
+
+        if not checkpoint_path.exists():
             raise FileNotFoundError(
-                f"Checkpoint not found: {checkpoint_path}"
+                f"Checkpoint not found after download: {checkpoint_path}"
             )
 
         print(f"\nLoading RLVR checkpoint: {checkpoint_path}")
