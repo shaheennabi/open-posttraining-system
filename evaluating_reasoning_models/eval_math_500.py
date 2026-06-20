@@ -317,7 +317,15 @@ def main():
         raise ValueError("--dataset_size must be non-negative")
 
     if args.checkpoint_glob:
-        checkpoint_paths = discover_checkpoint_paths(args.checkpoint_glob)
+        try:
+            checkpoint_paths = discover_checkpoint_paths(args.checkpoint_glob)
+        except FileNotFoundError:
+            checkpoint_paths = [args.checkpoint_path]
+            print(
+                f"No local checkpoints matched {args.checkpoint_glob!r}; "
+                f"falling back to {args.checkpoint_path}. "
+                "The model loader will try to download it from Hugging Face if needed."
+            )
     else:
         try:
             checkpoint_paths = [resolve_existing_path(args.checkpoint_path, "Checkpoint")]

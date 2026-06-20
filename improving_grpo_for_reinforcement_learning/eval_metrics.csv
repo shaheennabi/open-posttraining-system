@@ -1,2 +1,0 @@
-step,eval_acc,num_correct,num_examples,avg_response_len,runtime_minutes,jsonl_path
-50,0.4,20,50,220.8,5.97,math500-step00050-cuda-0.jsonl
