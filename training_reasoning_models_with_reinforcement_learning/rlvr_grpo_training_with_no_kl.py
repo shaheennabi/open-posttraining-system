@@ -23,10 +23,20 @@ from evaluating_reasoning_models.tokenizer_only import load_tokenizer_only
 
 
 SCRIPT_NAME = Path(__file__).stem
-LOG_PATH = Path(__file__).parent / "logs" / f"{SCRIPT_NAME}_outputs.txt"
-METRICS_LOG_PATH = Path(__file__).parent / "logs" / f"{SCRIPT_NAME}_metrics.txt"
-CSV_LOG_PATH = Path(__file__).parent / "logs" / f"{SCRIPT_NAME}_metrics.csv"
-CHECKPOINT_DIR = Path(__file__).parent / "checkpoints" / SCRIPT_NAME
+
+# improving_grpo_for_reinforcement_learning/
+BASE_DIR = Path(__file__).parent
+
+# improving_grpo_for_reinforcement_learning/qwen/
+CHECKPOINT_DIR = BASE_DIR / "qwen"
+
+# Keep logs in the project root
+LOG_PATH = BASE_DIR / f"{SCRIPT_NAME}_outputs.txt"
+METRICS_LOG_PATH = BASE_DIR / f"{SCRIPT_NAME}_metrics.txt"
+CSV_LOG_PATH = BASE_DIR / f"{SCRIPT_NAME}_metrics.csv"
+
+# Create qwen directory automatically
+CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
