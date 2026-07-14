@@ -222,3 +222,5 @@ venv/
 env/
 my_env
 training_reasoning_models_with_reinforcement_learning/*.pth
+training_small_language_model/TinyStoriesV2-GPT4-train.txt
+training_small_language_model/TinyStoriesV2-GPT4-valid.txt
