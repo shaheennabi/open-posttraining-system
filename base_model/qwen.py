@@ -253,72 +253,289 @@ class Qwen3Model(nn.Module):
     def __init__(self, cfg):
         super().__init__()
 
+        # ---------------------------------------------------------
         # Main model parameters
-        self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"], dtype=cfg["dtype"])
+        # ---------------------------------------------------------
 
-        self.trf_blocks = nn.ModuleList(  # ModuleList since Sequential can only accept one input, and we need `x, mask, cos, sin`
-            [TransformerBlock(cfg) for _ in range(cfg["n_layers"])]
+        self.tok_emb = nn.Embedding(
+            cfg["vocab_size"],
+            cfg["emb_dim"],
+            dtype=cfg["dtype"]
         )
-        self.final_norm = RMSNorm(cfg["emb_dim"])
-        self.out_head = nn.Linear(cfg["emb_dim"], cfg["vocab_size"], bias=False, dtype=cfg["dtype"])
 
-        # Reusable utilities
+        self.trf_blocks = nn.ModuleList(
+            [
+                TransformerBlock(cfg)
+                for _ in range(cfg["n_layers"])
+            ]
+        )
+
+        self.final_norm = RMSNorm(cfg["emb_dim"])
+
+        self.out_head = nn.Linear(
+            cfg["emb_dim"],
+            cfg["vocab_size"],
+            bias=False,
+            dtype=cfg["dtype"]
+        )
+
+
+        # ---------------------------------------------------------
+        # Reusable RoPE utilities
+        # ---------------------------------------------------------
+
         if cfg["head_dim"] is None:
             head_dim = cfg["emb_dim"] // cfg["n_heads"]
         else:
             head_dim = cfg["head_dim"]
+
+
         cos, sin = compute_rope_angles(
             head_dim=head_dim,
             theta_base=cfg["rope_base"],
             context_length=cfg["context_length"]
         )
-        self.register_buffer("cos", cos, persistent=False)
-        self.register_buffer("sin", sin, persistent=False)
+
+
+        ## register cos/sin as buffers
+        ## these move automatically with model.to(device)
+        ## but are not trainable parameters
+        self.register_buffer(
+            "cos",
+            cos,
+            persistent=False
+        )
+
+        self.register_buffer(
+            "sin",
+            sin,
+            persistent=False
+        )
+
+
         self.cfg = cfg
-        self.current_pos = 0  # Track current position in KV cache
 
-    def forward(self, in_idx, cache=None):
-        # Forward pass
-        tok_embeds = self.tok_emb(in_idx)
-        x = tok_embeds
-
-        num_tokens = x.shape[1]
-        if cache is not None:
-            pos_start = self.current_pos
-            pos_end = pos_start + num_tokens
-            self.current_pos = pos_end
-            query_positions = torch.arange(pos_start, pos_end, device=x.device)
-            key_positions = torch.arange(pos_end, device=x.device)
-            mask = key_positions[None, :] > query_positions[:, None]
-        else:
-            pos_start = 0  # Not strictly necessary but helps torch.compile
-            mask = torch.triu(
-                torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1
-            )
-   
-        mask = mask[None, None, :, :]  # broadcast mask
-
-        # Slice cos/sin for the current token positions
-        cos = self.cos[pos_start:pos_start + num_tokens].to(x.device).to(x.dtype)
-        sin = self.sin[pos_start:pos_start + num_tokens].to(x.device).to(x.dtype)
-
-        for i, block in enumerate(self.trf_blocks):
-            blk_cache = cache.get(i) if cache else None
-            x, new_blk_cache = block(x, mask, cos, sin,
-                                     cache=blk_cache)
-            if cache is not None:
-                cache.update(i, new_blk_cache)
-
-        x = self.final_norm(x)
-        logits = self.out_head(x.to(self.cfg["dtype"]))
-        return logits
-
-    def reset_kv_cache(self):
+        ## track current position when using KV cache
         self.current_pos = 0
 
 
 
+    def forward(self, in_idx, cache=None):
 
+        # TOKEN EMBEDDINGS
+
+        ## in_idx shape --> (b, t)
+
+        tok_embeds = self.tok_emb(in_idx)
+
+        ## tok_embeds shape --> (b, t, emb_dim)
+
+        x = tok_embeds
+
+
+        ## number of tokens in current forward pass
+        num_tokens = x.shape[1]
+
+
+
+        # BUILD CAUSAL ATTENTION MASK
+
+        if cache is not None:
+
+            ## used during autoregressive generation with KV cache
+
+            pos_start = self.current_pos
+            pos_end = pos_start + num_tokens
+
+            self.current_pos = pos_end
+
+
+            query_positions = torch.arange(pos_start, pos_end, device=x.device)
+
+
+            key_positions = torch.arange(pos_end, device=x.device)
+
+
+            mask = (key_positions[None, :] > query_positions[:, None])
+
+
+        else:
+
+            ## for our interpretability experiment
+            ## we pass the complete prompt at once
+            ## therefore pos_start = 0
+
+            pos_start = 0
+
+
+            ## standard causal mask
+            ##
+            ## token i cannot attend to future tokens j > i
+
+            mask = torch.triu(torch.ones(num_tokens, num_tokens, device=x.device, dtype=torch.bool), diagonal=1)
+
+
+        ## broadcast causal mask
+        ##
+        ## (t, t)
+        ##    ↓
+        ## (1, 1, t, t)
+
+        mask = mask[None, None, :, :]
+
+
+
+        # SLICE RoPE VALUES FOR CURRENT POSITIONS
+        cos = self.cos[pos_start : pos_start + num_tokens].to(device=x.device, dtype=x.dtype)
+
+
+        sin = self.sin[pos_start : pos_start + num_tokens].to(device=x.device, dtype=x.dtype)
+
+
+
+        # INTERPRETABILITY STORAGE
+
+        ## we will store ONE vector from every transformer layer:
+        ##
+        ## the hidden representation of the LAST prompt token
+        ##
+        ## each stored vector has shape:
+        ##
+        ## (b, emb_dim)
+
+        hidden_layers = []
+
+
+
+        # TRANSFORMER BLOCKS
+
+        for i, block in enumerate(self.trf_blocks):
+
+            blk_cache = (cache.get(i) if cache is not None else None)
+
+
+            ## before transformer block:
+            ##
+            ## x shape --> (b, t, emb_dim)
+
+
+            x, new_blk_cache = block(x, mask, cos, sin, cache=blk_cache)
+
+
+            ## after transformer block:
+            ##
+            ## x shape --> (b, t, emb_dim)
+            ##
+            ## x contains the representation of EVERY token
+            ## after transformer layer i
+
+
+            # INTERPRETABILITY EXTRACTION
+            ## extract ONLY the last prompt-token representation
+            ##
+            ## x:
+            ##     (b, t, emb_dim)
+            ##
+            ## x[:, -1, :]:
+            ##     (b, emb_dim)
+            ##
+            ## because we process one complete prompt without
+            ## padding, index -1 is the final prompt token
+
+            last_token_hidden_layer = x[:, -1, :]
+
+
+            ## store this layer's last-token representation
+
+            hidden_layers.append(last_token_hidden_layer)
+
+
+            ## update KV cache only when cache is being used
+
+            if cache is not None:cache.update(i, new_blk_cache)
+
+
+
+        # FINAL NORMALIZATION
+
+        ## IMPORTANT:
+        ##
+        ## hidden_layers were collected BEFORE this final RMSNorm.
+        ##
+        ## Therefore our representations correspond to:
+        ##
+        ## post-transformer-block
+        ## pre-final-RMSNorm
+        ##
+        ## residual-stream representations.
+
+
+        ## x shape remains:
+        ##
+        ## (b, t, emb_dim)
+
+        x = self.final_norm(x)
+
+
+
+        # LANGUAGE MODEL HEAD
+
+        ## project:
+        ##
+        ## (b, t, emb_dim)
+        ##        ↓
+        ## (b, t, vocab_size)
+
+        logits = self.out_head(x.to(self.cfg["dtype"]))
+
+
+
+        # STACK HIDDEN REPRESENTATIONS
+
+        ## before stacking:
+        ##
+        ## hidden_layers = [
+        ##
+        ##     layer_1 --> (b, emb_dim),
+        ##     layer_2 --> (b, emb_dim),
+        ##     layer_3 --> (b, emb_dim),
+        ##     ...
+        ##     layer_L --> (b, emb_dim)
+        ##
+        ## ]
+
+
+        ## stack across transformer layers
+        ##
+        ## list of L × (b, emb_dim)
+        ##
+        ## becomes:
+        ##
+        ## (b, n_layers, emb_dim)
+
+        hidden_layers = torch.stack(hidden_layers, dim=1)
+
+
+
+        # RETURN
+
+        ## logits:
+        ##
+        ## (b, t, vocab_size)
+        ##
+        ##
+        ## hidden_layers:
+        ##
+        ## (b, n_layers, emb_dim)
+
+        return logits, hidden_layers
+
+
+
+    def reset_kv_cache(self):
+
+        ## reset generation position
+        self.current_pos = 0
 
 
 
