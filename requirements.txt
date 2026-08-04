@@ -6,3 +6,4 @@ huggingface_hub==0.36.2
 from_root
 datasets 
 matplotlib
+scikit-learn
