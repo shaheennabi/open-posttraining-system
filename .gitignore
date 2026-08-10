@@ -226,3 +226,6 @@ training_small_language_model/TinyStoriesV2-GPT4-train.txt
 training_small_language_model/TinyStoriesV2-GPT4-valid.txt
 toptal_technical_interview/
 research/beyond_fixed_directions_report_updated.tex
+research/main.tex
+research/extracted_expanded_outputs
+research/figures
