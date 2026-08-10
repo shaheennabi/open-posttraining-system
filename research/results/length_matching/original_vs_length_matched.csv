@@ -1,0 +1,7 @@
+metric,Original,Length-matched
+Length-only accuracy,0.965,0.6
+Length-only AUROC,0.994,0.875
+Hidden probe accuracy,1.0,1.0
+Hidden probe AUROC,1.0,1.0
+PCA PC1 variance,0.4904,0.5396918058395386
+PCA PC2 variance,0.0888,0.08432808518409729

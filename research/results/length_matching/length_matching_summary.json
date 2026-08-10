@@ -1,0 +1,98 @@
+{
+  "matched_reasoning_count": 10,
+  "matched_memorization_count": 10,
+  "length_verification": {
+    "reasoning_stats": {
+      "count": 10,
+      "min": 22.0,
+      "max": 32.0,
+      "mean": 28.1,
+      "median": 29.0,
+      "std": 3.414023367751831,
+      "p25": 25.25,
+      "p50": 29.0,
+      "p75": 31.0
+    },
+    "memorization_stats": {
+      "count": 10,
+      "min": 22.0,
+      "max": 29.0,
+      "mean": 25.1,
+      "median": 24.5,
+      "std": 2.282785822435191,
+      "p25": 23.25,
+      "p50": 24.5,
+      "p75": 27.0
+    },
+    "absolute_mean_difference": 3.0,
+    "absolute_median_difference": 4.5,
+    "mean_absolute_pair_difference": 3.0
+  },
+  "length_only_baseline": {
+    "folds": [
+      {
+        "fold": 1,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "auroc": 1.0
+      },
+      {
+        "fold": 2,
+        "accuracy": 0.75,
+        "balanced_accuracy": 0.75,
+        "auroc": 1.0
+      },
+      {
+        "fold": 3,
+        "accuracy": 0.75,
+        "balanced_accuracy": 0.75,
+        "auroc": 0.875
+      },
+      {
+        "fold": 4,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "auroc": 1.0
+      },
+      {
+        "fold": 5,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "auroc": 0.5
+      }
+    ],
+    "accuracy": {
+      "mean": 0.6,
+      "std": 0.1224744871391589,
+      "values": [
+        0.5,
+        0.75,
+        0.75,
+        0.5,
+        0.5
+      ]
+    },
+    "balanced_accuracy": {
+      "mean": 0.6,
+      "std": 0.1224744871391589,
+      "values": [
+        0.5,
+        0.75,
+        0.75,
+        0.5,
+        0.5
+      ]
+    },
+    "auroc": {
+      "mean": 0.875,
+      "std": 0.19364916731037085,
+      "values": [
+        1.0,
+        1.0,
+        0.875,
+        1.0,
+        0.5
+      ]
+    }
+  }
+}
