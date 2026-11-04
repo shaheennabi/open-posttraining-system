@@ -1,4 +1,4 @@
-# Open Post Training
+# Open Post-training system
 
 A compact research codebase for post-training large language models with a focus on reasoning and reinforcement learning experiments.
 
