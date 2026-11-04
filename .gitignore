@@ -224,6 +224,7 @@ my_env
 training_reasoning_models_with_reinforcement_learning/*.pth
 training_small_language_model/TinyStoriesV2-GPT4-train.txt
 training_small_language_model/TinyStoriesV2-GPT4-valid.txt
+learning/training_small_language_model/TinyStoriesV2-GPT4-train.txt
 toptal_technical_interview/
 research/beyond_fixed_directions_report_updated.tex
 research/main.tex
