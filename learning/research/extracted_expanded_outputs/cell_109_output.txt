@@ -1,0 +1,190 @@
+HF datasets available: True
+Expected existing local files:
+  math500.json: exists=True
+  popQA.json: exists=True
+Loaded MATH-500 local examples: 500
+MATH-500 example keys: ['answer', 'dataset', 'id', 'question', 'source_metadata', 'task_type']
+Loaded PopQA local examples: 14267
+PopQA example keys: ['answer', 'dataset', 'id', 'question', 'source_metadata', 'task_type']
+GSM8K schema: {'question': Value('string'), 'answer': Value('string')}
+Loaded GSM8K examples: 7473
+
+Resolving data files:   0%|          | 0/26 [00:00<?, ?it/s]
+
+TriviaQA config: rc.nocontext
+TriviaQA schema: {'question': Value('string'), 'question_id': Value('string'), 'question_source': Value('string'), 'entity_pages': {'doc_source': List(Value('string')), 'filename': List(Value('string')), 'title': List(Value('string')), 'wiki_context': List(Value('string'))}, 'search_results': {'description': List(Value('string')), 'filename': List(Value('string')), 'rank': List(Value('int32')), 'title': List(Value('string')), 'url': List(Value('string')), 'search_context': List(Value('string'))}, 'answer': {'aliases': List(Value('string')), 'normalized_aliases': List(Value('string')), 'matched_wiki_entity_name': Value('string'), 'normalized_matched_wiki_entity_name': Value('string'), 'normalized_value': Value('string'), 'type': Value('string'), 'value': Value('string')}}
+Loaded TriviaQA examples: 138384
+Unified total examples: 160624
+Counts by dataset: Counter({'triviaqa': 138384, 'popqa': 14267, 'gsm8k': 7473, 'math500': 500})
+Counts by task_type: Counter({'factual_recall': 152651, 'reasoning': 7973})
+Deduplication
+  input examples  : 160624
+  kept examples   : 97477
+  removed examples: 63147
+  removal reasons : Counter({'duplicate_question': 63147, 'duplicate_dataset_id': 61778})
+
+Expanded deduplicated token lengths by dataset
+==============================================
+
+      group  count   min    max       mean  median        std   p25    p75
+0     gsm8k   7473  33.0  232.0  80.382711    76.0  21.598857  65.0  91.00
+1   math500    500  30.0  812.0  92.098000    72.0  76.391805  54.0  99.25
+2     popqa  13066  26.0   71.0  29.761289    29.0   2.279049  28.0  31.00
+3  triviaqa  76438  26.0  270.0  40.119234    38.0   9.768143  33.0  44.00
+
+
+Expanded deduplicated token lengths by task type
+================================================
+
+            group  count   min    max       mean  median        std   p25  \
+0  factual_recall  89504  26.0  270.0  38.607157    36.0   9.778614  32.0   
+1       reasoning   7973  30.0  812.0  81.117396    76.0  28.471044  64.0   
+
+    p75  
+0  43.0  
+1  91.0  
+
+<Figure size 1400x500 with 2 Axes>
+
+[saved image: C:\Users\mailm\Documents\open-posttraining-system\research\extracted_expanded_outputs\cell_109_image_1.png]
+
+Distributional length matching report
+{
+  "requested_target_per_class": 200,
+  "actual_per_class": 200,
+  "bin_width": 10,
+  "random_seed": 42,
+  "available_by_task": {
+    "reasoning": 7973,
+    "factual_recall": 89504
+  },
+  "selected_by_task": {
+    "reasoning": 200,
+    "factual_recall": 200
+  },
+  "discarded_by_task": {
+    "reasoning": 7773,
+    "factual_recall": 89304
+  },
+  "capacity_by_bin": {
+    "20": 0,
+    "30": 24,
+    "40": 213,
+    "50": 995,
+    "60": 1661,
+    "70": 731,
+    "80": 263,
+    "90": 111,
+    "100": 31,
+    "110": 14,
+    "120": 11,
+    "130": 4,
+    "140": 4,
+    "150": 5,
+    "160": 2,
+    "170": 2,
+    "180": 1,
+    "190": 0,
+    "200": 1,
+    "210": 2,
+    "220": 1,
+    "230": 0,
+    "240": 0,
+    "250": 0,
+    "260": 0,
+    "270": 1,
+    "290": 0,
+    "330": 0,
+    "360": 0,
+    "480": 0,
+    "680": 0,
+    "720": 0,
+    "810": 0
+  },
+  "selected_per_bin": {
+    "20": 0,
+    "30": 24,
+    "40": 176
+  }
+}
+
+Before expanded length matching by dataset
+==========================================
+
+      group  count   min    max       mean  median        std   p25    p75
+0     gsm8k   7473  33.0  232.0  80.382711    76.0  21.598857  65.0  91.00
+1   math500    500  30.0  812.0  92.098000    72.0  76.391805  54.0  99.25
+2     popqa  13066  26.0   71.0  29.761289    29.0   2.279049  28.0  31.00
+3  triviaqa  76438  26.0  270.0  40.119234    38.0   9.768143  33.0  44.00
+
+
+Before expanded length matching by task type
+============================================
+
+            group  count   min    max       mean  median        std   p25  \
+0  factual_recall  89504  26.0  270.0  38.607157    36.0   9.778614  32.0   
+1       reasoning   7973  30.0  812.0  81.117396    76.0  28.471044  64.0   
+
+    p75  
+0  43.0  
+1  91.0  
+
+<Figure size 1400x500 with 2 Axes>
+
+[saved image: C:\Users\mailm\Documents\open-posttraining-system\research\extracted_expanded_outputs\cell_109_image_2.png]
+
+
+After expanded length matching by dataset
+=========================================
+
+      group  count   min   max       mean  median       std   p25   p75
+0     gsm8k    116  33.0  49.0  46.344828    47.0  2.788496  45.0  49.0
+1   math500     84  30.0  49.0  42.059524    43.0  4.734776  39.0  46.0
+2     popqa      4  31.0  32.0  31.500000    31.5  0.577350  31.0  32.0
+3  triviaqa    196  31.0  49.0  42.775510    42.5  3.644541  41.0  45.0
+
+
+After expanded length matching by task type
+===========================================
+
+            group  count   min   max    mean  median       std   p25   p75
+0  factual_recall    200  31.0  49.0  42.550    42.0  3.940194  41.0  45.0
+1       reasoning    200  30.0  49.0  44.545    46.0  4.282484  43.0  48.0
+
+<Figure size 1400x500 with 2 Axes>
+
+[saved image: C:\Users\mailm\Documents\open-posttraining-system\research\extracted_expanded_outputs\cell_109_image_3.png]
+
+Length-match difference summary
+{
+  "absolute_mean_difference": 1.9950000000000045,
+  "absolute_median_difference": 4.0,
+  "standardized_mean_difference": 0.48482348246954876
+}
+WARNING: standardized mean difference remains above 0.25.
+
+Expanded length-only baseline
+=============================
+Fold 1: acc=0.6125, bal_acc=0.6125, auroc=0.6950
+Fold 2: acc=0.7000, bal_acc=0.7000, auroc=0.7019
+Fold 3: acc=0.7000, bal_acc=0.7000, auroc=0.7203
+Fold 4: acc=0.6625, bal_acc=0.6625, auroc=0.6475
+Fold 5: acc=0.5625, bal_acc=0.5625, auroc=0.5578
+Summary:
+  accuracy          0.6475 +/- 0.0533
+  balanced_accuracy 0.6475 +/- 0.0533
+  auroc             0.6645 +/- 0.0585
+
+Expanded TF-IDF lexical baseline
+================================
+Fold 1: acc=0.9500, bal_acc=0.9500, auroc=0.9694
+Fold 2: acc=0.9625, bal_acc=0.9625, auroc=1.0000
+Fold 3: acc=0.9500, bal_acc=0.9500, auroc=0.9931
+Fold 4: acc=0.9500, bal_acc=0.9500, auroc=0.9931
+Fold 5: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Summary:
+  accuracy          0.9600 +/- 0.0146
+  balanced_accuracy 0.9600 +/- 0.0146
+  auroc             0.9911 +/- 0.0113
+WARNING: lexical features remain strongly predictive.
+Runner A complete. Inspect length-only and TF-IDF baselines before running Qwen extraction.

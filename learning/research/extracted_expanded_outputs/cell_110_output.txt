@@ -1,0 +1,608 @@
+Extracted 25/400 examples
+Extracted 50/400 examples
+Extracted 75/400 examples
+Extracted 100/400 examples
+Extracted 125/400 examples
+Extracted 150/400 examples
+Extracted 175/400 examples
+Extracted 200/400 examples
+Extracted 225/400 examples
+Extracted 250/400 examples
+Extracted 275/400 examples
+Extracted 300/400 examples
+Extracted 325/400 examples
+Extracted 350/400 examples
+Extracted 375/400 examples
+Extracted 400/400 examples
+Saved representations:
+  expanded_rq1_control/representations/expanded_length_matched/hidden_states.pt (400, 28, 1024)
+  expanded_rq1_control/representations/expanded_length_matched/final_layer.pt (400, 1024)
+  expanded_rq1_control/representations/expanded_length_matched/metadata.json
+Expanded final-layer PCA
+{
+  "pc1_variance": 0.21970508992671967,
+  "pc2_variance": 0.12253529578447342,
+  "pc1_pc2_variance": 0.3422403931617737
+}
+
+<Figure size 800x600 with 1 Axes>
+
+[saved image: C:\Users\mailm\Documents\open-posttraining-system\research\extracted_expanded_outputs\cell_110_image_1.png]
+
+
+Expanded Qwen final-layer probe
+===============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Summary:
+  accuracy          0.9975 +/- 0.0050
+  balanced_accuracy 0.9975 +/- 0.0050
+  auroc             1.0000 +/- 0.0000
+
+Random-label probe repeat 1
+===========================
+Fold 1: acc=0.4750, bal_acc=0.4750, auroc=0.4709
+Fold 2: acc=0.4500, bal_acc=0.4500, auroc=0.4456
+Fold 3: acc=0.4500, bal_acc=0.4500, auroc=0.4987
+Fold 4: acc=0.5000, bal_acc=0.5000, auroc=0.4531
+Fold 5: acc=0.5250, bal_acc=0.5250, auroc=0.5112
+Summary:
+  accuracy          0.4800 +/- 0.0292
+  balanced_accuracy 0.4800 +/- 0.0292
+  auroc             0.4759 +/- 0.0254
+
+Random-label probe repeat 2
+===========================
+Fold 1: acc=0.6000, bal_acc=0.6000, auroc=0.5447
+Fold 2: acc=0.4500, bal_acc=0.4500, auroc=0.4750
+Fold 3: acc=0.6000, bal_acc=0.6000, auroc=0.6344
+Fold 4: acc=0.5375, bal_acc=0.5375, auroc=0.5706
+Fold 5: acc=0.5000, bal_acc=0.5000, auroc=0.5550
+Summary:
+  accuracy          0.5375 +/- 0.0581
+  balanced_accuracy 0.5375 +/- 0.0581
+  auroc             0.5559 +/- 0.0511
+
+Random-label probe repeat 3
+===========================
+Fold 1: acc=0.4375, bal_acc=0.4375, auroc=0.3956
+Fold 2: acc=0.5750, bal_acc=0.5750, auroc=0.5341
+Fold 3: acc=0.4500, bal_acc=0.4500, auroc=0.4956
+Fold 4: acc=0.5250, bal_acc=0.5250, auroc=0.5100
+Fold 5: acc=0.4125, bal_acc=0.4125, auroc=0.3681
+Summary:
+  accuracy          0.4800 +/- 0.0605
+  balanced_accuracy 0.4800 +/- 0.0605
+  auroc             0.4607 +/- 0.0661
+
+Random-label probe repeat 4
+===========================
+Fold 1: acc=0.4625, bal_acc=0.4625, auroc=0.4956
+Fold 2: acc=0.4500, bal_acc=0.4500, auroc=0.4019
+Fold 3: acc=0.4625, bal_acc=0.4625, auroc=0.4609
+Fold 4: acc=0.4625, bal_acc=0.4625, auroc=0.4688
+Fold 5: acc=0.4750, bal_acc=0.4750, auroc=0.4719
+Summary:
+  accuracy          0.4625 +/- 0.0079
+  balanced_accuracy 0.4625 +/- 0.0079
+  auroc             0.4598 +/- 0.0312
+
+Random-label probe repeat 5
+===========================
+Fold 1: acc=0.5125, bal_acc=0.5125, auroc=0.5103
+Fold 2: acc=0.4000, bal_acc=0.4000, auroc=0.4181
+Fold 3: acc=0.4875, bal_acc=0.4875, auroc=0.4534
+Fold 4: acc=0.5500, bal_acc=0.5500, auroc=0.5312
+Fold 5: acc=0.5875, bal_acc=0.5875, auroc=0.5725
+Summary:
+  accuracy          0.5075 +/- 0.0635
+  balanced_accuracy 0.5075 +/- 0.0635
+  auroc             0.4971 +/- 0.0551
+
+Random-label probe repeat 6
+===========================
+Fold 1: acc=0.5000, bal_acc=0.5000, auroc=0.4994
+Fold 2: acc=0.5875, bal_acc=0.5875, auroc=0.5731
+Fold 3: acc=0.5125, bal_acc=0.5125, auroc=0.5316
+Fold 4: acc=0.4625, bal_acc=0.4625, auroc=0.4400
+Fold 5: acc=0.5250, bal_acc=0.5250, auroc=0.5237
+Summary:
+  accuracy          0.5175 +/- 0.0408
+  balanced_accuracy 0.5175 +/- 0.0408
+  auroc             0.5136 +/- 0.0438
+
+Random-label probe repeat 7
+===========================
+Fold 1: acc=0.5625, bal_acc=0.5625, auroc=0.6506
+Fold 2: acc=0.5125, bal_acc=0.5125, auroc=0.5006
+Fold 3: acc=0.4500, bal_acc=0.4500, auroc=0.4597
+Fold 4: acc=0.4875, bal_acc=0.4875, auroc=0.4669
+Fold 5: acc=0.4875, bal_acc=0.4875, auroc=0.4469
+Summary:
+  accuracy          0.5000 +/- 0.0371
+  balanced_accuracy 0.5000 +/- 0.0371
+  auroc             0.5049 +/- 0.0750
+
+Random-label probe repeat 8
+===========================
+Fold 1: acc=0.3125, bal_acc=0.3125, auroc=0.3263
+Fold 2: acc=0.4875, bal_acc=0.4875, auroc=0.4506
+Fold 3: acc=0.4500, bal_acc=0.4500, auroc=0.4472
+Fold 4: acc=0.4375, bal_acc=0.4375, auroc=0.3912
+Fold 5: acc=0.3750, bal_acc=0.3750, auroc=0.3272
+Summary:
+  accuracy          0.4125 +/- 0.0617
+  balanced_accuracy 0.4125 +/- 0.0617
+  auroc             0.3885 +/- 0.0547
+
+Random-label probe repeat 9
+===========================
+Fold 1: acc=0.5500, bal_acc=0.5500, auroc=0.5125
+Fold 2: acc=0.5375, bal_acc=0.5375, auroc=0.5591
+Fold 3: acc=0.4875, bal_acc=0.4875, auroc=0.4594
+Fold 4: acc=0.5750, bal_acc=0.5750, auroc=0.5825
+Fold 5: acc=0.4750, bal_acc=0.4750, auroc=0.4956
+Summary:
+  accuracy          0.5250 +/- 0.0379
+  balanced_accuracy 0.5250 +/- 0.0379
+  auroc             0.5218 +/- 0.0441
+
+Random-label probe repeat 10
+============================
+Fold 1: acc=0.4375, bal_acc=0.4375, auroc=0.3856
+Fold 2: acc=0.4875, bal_acc=0.4875, auroc=0.4575
+Fold 3: acc=0.4750, bal_acc=0.4750, auroc=0.4737
+Fold 4: acc=0.4500, bal_acc=0.4500, auroc=0.4788
+Fold 5: acc=0.4125, bal_acc=0.4125, auroc=0.3931
+Summary:
+  accuracy          0.4525 +/- 0.0267
+  balanced_accuracy 0.4525 +/- 0.0267
+  auroc             0.4378 +/- 0.0402
+Random-label repeated summary
+{
+  "accuracy": {
+    "mean": 0.4875,
+    "std": 0.03598610843089317,
+    "values": [
+      0.48,
+      0.5375,
+      0.48,
+      0.4625,
+      0.5075000000000001,
+      0.5175,
+      0.4999999999999999,
+      0.4125,
+      0.525,
+      0.45249999999999996
+    ]
+  },
+  "balanced_accuracy": {
+    "mean": 0.4875,
+    "std": 0.03598610843089317,
+    "values": [
+      0.48,
+      0.5375,
+      0.48,
+      0.4625,
+      0.5075,
+      0.5175,
+      0.4999999999999999,
+      0.4125,
+      0.5250000000000001,
+      0.45249999999999996
+    ]
+  },
+  "auroc": {
+    "mean": 0.48160625,
+    "std": 0.04526024616385226,
+    "values": [
+      0.4759375,
+      0.5559375000000001,
+      0.46068749999999997,
+      0.45981249999999996,
+      0.49712499999999993,
+      0.5135625000000001,
+      0.5049375,
+      0.38849999999999996,
+      0.5218125,
+      0.43775000000000003
+    ]
+  }
+}
+Cross-dataset result: {
+  "name": "train_math500_popqa_test_gsm8k_triviaqa",
+  "train_datasets": [
+    "math500",
+    "popqa"
+  ],
+  "test_datasets": [
+    "gsm8k",
+    "triviaqa"
+  ],
+  "train_count": 88,
+  "test_count": 312,
+  "train_class_counts": {
+    "1": 84,
+    "0": 4
+  },
+  "test_class_counts": {
+    "1": 116,
+    "0": 196
+  },
+  "accuracy": 0.9391025641025641,
+  "balanced_accuracy": 0.9515306122448979,
+  "auroc": 0.9994282195636875
+}
+Cross-dataset result: {
+  "name": "train_gsm8k_triviaqa_test_math500_popqa",
+  "train_datasets": [
+    "gsm8k",
+    "triviaqa"
+  ],
+  "test_datasets": [
+    "math500",
+    "popqa"
+  ],
+  "train_count": 312,
+  "test_count": 88,
+  "train_class_counts": {
+    "1": 116,
+    "0": 196
+  },
+  "test_class_counts": {
+    "1": 84,
+    "0": 4
+  },
+  "accuracy": 0.9659090909090909,
+  "balanced_accuracy": 0.9821428571428572,
+  "auroc": 1.0
+}
+Skipping math500 vs popqa; insufficient class counts: Counter({1: 84, 0: 4})
+
+Per-dataset probe: math500 vs triviaqa
+======================================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=0.9821, bal_acc=0.9872, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=0.9821, bal_acc=0.9872, auroc=1.0000
+Summary:
+  accuracy          0.9929 +/- 0.0087
+  balanced_accuracy 0.9949 +/- 0.0063
+  auroc             1.0000 +/- 0.0000
+Skipping gsm8k vs popqa; insufficient class counts: Counter({1: 116, 0: 4})
+
+Per-dataset probe: gsm8k vs triviaqa
+====================================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Summary:
+  accuracy          1.0000 +/- 0.0000
+  balanced_accuracy 1.0000 +/- 0.0000
+  auroc             1.0000 +/- 0.0000
+
+Expanded Qwen final-layer probe seed 42
+=======================================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Summary:
+  accuracy          0.9975 +/- 0.0050
+  balanced_accuracy 0.9975 +/- 0.0050
+  auroc             1.0000 +/- 0.0000
+
+Expanded Qwen final-layer probe seed 123
+========================================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Summary:
+  accuracy          0.9975 +/- 0.0050
+  balanced_accuracy 0.9975 +/- 0.0050
+  auroc             1.0000 +/- 0.0000
+
+Expanded Qwen final-layer probe seed 456
+========================================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Summary:
+  accuracy          0.9975 +/- 0.0050
+  balanced_accuracy 0.9975 +/- 0.0050
+  auroc             1.0000 +/- 0.0000
+Multi-seed probe summary
+{
+  "accuracy": {
+    "mean": 0.9974999999999999,
+    "std": 0.0,
+    "values": [
+      0.9974999999999999,
+      0.9974999999999999,
+      0.9974999999999999
+    ]
+  },
+  "balanced_accuracy": {
+    "mean": 0.9974999999999999,
+    "std": 0.0,
+    "values": [
+      0.9974999999999999,
+      0.9974999999999999,
+      0.9974999999999999
+    ]
+  },
+  "auroc": {
+    "mean": 1.0,
+    "std": 0.0,
+    "values": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  }
+}
+
+                   method           accuracy              auroc
+0             Length-only  0.6475 +/- 0.0533  0.6645 +/- 0.0585
+1          TF-IDF lexical  0.9600 +/- 0.0146  0.9911 +/- 0.0113
+2  Qwen final-layer probe  0.9975 +/- 0.0050  1.0000 +/- 0.0000
+3      Random-label probe  0.4875 +/- 0.0360  0.4816 +/- 0.0453
+
+Saved result files
+  baseline_summary_table: expanded_rq1_control/results/baselines/baseline_summary_table.csv
+  length_baseline_results: expanded_rq1_control/results/baselines/length_baseline_results.json
+  tfidf_baseline_results: expanded_rq1_control/results/baselines/tfidf_baseline_results.json
+  qwen_probe_results: expanded_rq1_control/results/linear_probe/qwen_probe_results.json
+  random_label_results: expanded_rq1_control/results/linear_probe/random_label_results.json
+  cross_dataset_results: expanded_rq1_control/results/cross_dataset/cross_dataset_results.json
+  per_dataset_results: expanded_rq1_control/results/per_dataset/per_dataset_results.json
+  multi_seed_results: expanded_rq1_control/results/linear_probe/multi_seed_results.json
+  pca_results: expanded_rq1_control/results/pca/pca_results.json
+
+======================================================================
+EXPANDED RQ1 CONTROL EXPERIMENT REPORT
+======================================================================
+1. Dataset counts before/after deduplication
+   raw examples      : 160624
+   deduped examples  : 97477
+   removed duplicates: 63147
+2. Counts per source dataset
+   raw    : {'math500': 500, 'gsm8k': 7473, 'popqa': 14267, 'triviaqa': 138384}
+   deduped: {'math500': 500, 'gsm8k': 7473, 'popqa': 13066, 'triviaqa': 76438}
+   matched: {'gsm8k': 116, 'triviaqa': 196, 'math500': 84, 'popqa': 4}
+3. Final matched dataset size
+   matched total: 400
+   matched by task: {'reasoning': 200, 'factual_recall': 200}
+   match report actual_per_class: 200
+4. Token-length statistics
+   differences: {'absolute_mean_difference': 1.9950000000000045, 'absolute_median_difference': 4.0, 'standardized_mean_difference': 0.48482348246954876}
+5. Length-only baseline
+   accuracy: {'mean': 0.6475000000000001, 'std': 0.05326818938165627, 'values': [0.6125, 0.7, 0.7, 0.6625, 0.5625]}
+   auroc   : {'mean': 0.6645, 'std': 0.058503672427463904, 'values': [0.6950000000000001, 0.701875, 0.7203125, 0.6475, 0.5578125]}
+6. TF-IDF lexical baseline
+   accuracy: {'mean': 0.96, 'std': 0.014577379737113287, 'values': [0.95, 0.9625, 0.95, 0.95, 0.9875]}
+   auroc   : {'mean': 0.9911249999999999, 'std': 0.011301272052295714, 'values': [0.969375, 1.0, 0.993125, 0.993125, 1.0]}
+7. Qwen final-layer probe
+   accuracy: {'mean': 0.9974999999999999, 'std': 0.004999999999999982, 'values': [0.9875, 1.0, 1.0, 1.0, 1.0]}
+   auroc   : {'mean': 1.0, 'std': 0.0, 'values': [1.0, 1.0, 1.0, 1.0, 1.0]}
+8. Random-label control
+   accuracy: {'mean': 0.4875, 'std': 0.03598610843089317, 'values': [0.48, 0.5375, 0.48, 0.4625, 0.5075000000000001, 0.5175, 0.4999999999999999, 0.4125, 0.525, 0.45249999999999996]}
+   auroc   : {'mean': 0.48160625, 'std': 0.04526024616385226, 'values': [0.4759375, 0.5559375000000001, 0.46068749999999997, 0.45981249999999996, 0.49712499999999993, 0.5135625000000001, 0.5049375, 0.38849999999999996, 0.5218125, 0.43775000000000003]}
+9. Cross-dataset results
+[
+  {
+    "name": "train_math500_popqa_test_gsm8k_triviaqa",
+    "train_datasets": [
+      "math500",
+      "popqa"
+    ],
+    "test_datasets": [
+      "gsm8k",
+      "triviaqa"
+    ],
+    "train_count": 88,
+    "test_count": 312,
+    "train_class_counts": {
+      "1": 84,
+      "0": 4
+    },
+    "test_class_counts": {
+      "1": 116,
+      "0": 196
+    },
+    "accuracy": 0.9391025641025641,
+    "balanced_accuracy": 0.9515306122448979,
+    "auroc": 0.9994282195636875
+  },
+  {
+    "name": "train_gsm8k_triviaqa_test_math500_popqa",
+    "train_datasets": [
+      "gsm8k",
+      "triviaqa"
+    ],
+    "test_datasets": [
+      "math500",
+      "popqa"
+    ],
+    "train_count": 312,
+    "test_count": 88,
+    "train_class_counts": {
+      "1": 116,
+      "0": 196
+    },
+    "test_class_counts": {
+      "1": 84,
+      "0": 4
+    },
+    "accuracy": 0.9659090909090909,
+    "balanced_accuracy": 0.9821428571428572,
+    "auroc": 1.0
+  }
+]
+10. Per-dataset results
+{
+  "math500_vs_triviaqa": {
+    "title": "Per-dataset probe: math500 vs triviaqa",
+    "folds": [
+      {
+        "fold": 1,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 2,
+        "accuracy": 0.9821428571428571,
+        "balanced_accuracy": 0.9871794871794872,
+        "auroc": 1.0
+      },
+      {
+        "fold": 3,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 4,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 5,
+        "accuracy": 0.9821428571428571,
+        "balanced_accuracy": 0.9871794871794872,
+        "auroc": 1.0
+      }
+    ],
+    "accuracy": {
+      "mean": 0.9928571428571429,
+      "std": 0.008748177652797088,
+      "values": [
+        1.0,
+        0.9821428571428571,
+        1.0,
+        1.0,
+        0.9821428571428571
+      ]
+    },
+    "balanced_accuracy": {
+      "mean": 0.9948717948717949,
+      "std": 0.006280742930213255,
+      "values": [
+        1.0,
+        0.9871794871794872,
+        1.0,
+        1.0,
+        0.9871794871794872
+      ]
+    },
+    "auroc": {
+      "mean": 1.0,
+      "std": 0.0,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "gsm8k_vs_triviaqa": {
+    "title": "Per-dataset probe: gsm8k vs triviaqa",
+    "folds": [
+      {
+        "fold": 1,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 2,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 3,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 4,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      },
+      {
+        "fold": 5,
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0,
+        "auroc": 1.0
+      }
+    ],
+    "accuracy": {
+      "mean": 1.0,
+      "std": 0.0,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "balanced_accuracy": {
+      "mean": 1.0,
+      "std": 0.0,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "mean": 1.0,
+      "std": 0.0,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  }
+}
+11. PCA explained variance
+{
+  "pc1_variance": 0.21970508992671967,
+  "pc2_variance": 0.12253529578447342,
+  "pc1_pc2_variance": 0.3422403931617737,
+  "figure_path": "expanded_rq1_control/figures/pca/expanded_final_layer_pca.png",
+  "npz_path": "expanded_rq1_control/results/pca/expanded_final_layer_pca.npz"
+}
+12. Saved artifacts
+   representation paths: {'hidden_states': 'expanded_rq1_control/representations/expanded_length_matched/hidden_states.pt', 'final_layer': 'expanded_rq1_control/representations/expanded_length_matched/final_layer.pt', 'metadata': 'expanded_rq1_control/representations/expanded_length_matched/metadata.json'}
+   result paths: {'baseline_summary_table': 'expanded_rq1_control/results/baselines/baseline_summary_table.csv', 'length_baseline_results': 'expanded_rq1_control/results/baselines/length_baseline_results.json', 'tfidf_baseline_results': 'expanded_rq1_control/results/baselines/tfidf_baseline_results.json', 'qwen_probe_results': 'expanded_rq1_control/results/linear_probe/qwen_probe_results.json', 'random_label_results': 'expanded_rq1_control/results/linear_probe/random_label_results.json', 'cross_dataset_results': 'expanded_rq1_control/results/cross_dataset/cross_dataset_results.json', 'per_dataset_results': 'expanded_rq1_control/results/per_dataset/per_dataset_results.json', 'multi_seed_results': 'expanded_rq1_control/results/linear_probe/multi_seed_results.json', 'pca_results': 'expanded_rq1_control/results/pca/pca_results.json'}
+
+SCIENTIFIC INTERPRETATION
+- Representations may distinguish the task groups if Qwen probe performance exceeds length-only and lexical baselines.
+- Strong representation separation does not by itself prove the model contains a reasoning representation.
+- This experiment does not test or claim that reasoning is encoded in one linear direction.
+- Proceed to the explicit single-direction test only after inspecting these controls.

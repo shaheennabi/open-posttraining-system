@@ -80,4 +80,4 @@ A compact research codebase for post-training large language models with a focus
    ```
 
 ## Status
-Active research development. Contributions and experimentation are welcome.
+This project is in progress. Contributions and experimentation are welcome.

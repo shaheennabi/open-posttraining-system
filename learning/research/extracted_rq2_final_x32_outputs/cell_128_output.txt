@@ -1,0 +1,889 @@
+/tmp/ipykernel_8401/2452439225.py:9: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  payload = torch.load(RQ2_RQ1_HIDDEN_PATH, map_location="cpu")
+
+Loaded exact RQ1 artifacts
+hidden shape   : (400, 28, 1024)
+metadata rows  : 400
+task counts    : {'reasoning': 200, 'factual_recall': 200}
+dataset counts : {'gsm8k': 116, 'triviaqa': 196, 'math500': 84, 'popqa': 4}
+Loading base model/tokenizer with existing custom loader.
+
+
+Loading base Qwen weights
+Resolving final RQ2 checkpoint: x32/Qwen3-0.6B-GRPO-GSM8K-Think
+
+/home/zeus/miniconda3/envs/cloudspace/lib/python3.12/site-packages/huggingface_hub/file_download.py:986: UserWarning: `local_dir_use_symlinks` parameter is deprecated and will be ignored. The process to download files to a local folder has been updated and do not rely on symlinks anymore. You only need to pass a destination folder as`local_dir`.
+For more details, check out https://huggingface.co/docs/huggingface_hub/main/en/guides/download#download-files-to-local-folder.
+  warnings.warn(
+
+Fetching 6 files:   0%|          | 0/6 [00:00<?, ?it/s]
+Safetensors files:
+  /teamspace/studios/this_studio/open-posttraining-system/research/checkpoints/rq2_final_x32/model.safetensors
+Loaded HF checkpoint tensors: 310
+First HF keys:
+  model.embed_tokens.weight: (151936, 1024)
+  model.layers.0.input_layernorm.weight: (1024,)
+  model.layers.0.mlp.down_proj.weight: (1024, 3072)
+  model.layers.0.mlp.gate_proj.weight: (3072, 1024)
+  model.layers.0.mlp.up_proj.weight: (3072, 1024)
+  model.layers.0.post_attention_layernorm.weight: (1024,)
+  model.layers.0.self_attn.k_norm.weight: (128,)
+  model.layers.0.self_attn.k_proj.weight: (1024, 1024)
+  model.layers.0.self_attn.o_proj.weight: (1024, 2048)
+  model.layers.0.self_attn.q_norm.weight: (128,)
+  model.layers.0.self_attn.q_proj.weight: (2048, 1024)
+  model.layers.0.self_attn.v_proj.weight: (1024, 1024)
+Strict x32 HF-to-custom compatibility report
+{
+  "repo_id": "x32/Qwen3-0.6B-GRPO-GSM8K-Think",
+  "hf_tensor_count": 310,
+  "custom_tensor_count": 311,
+  "mapped_tensor_count": 311,
+  "missing_custom_keys": [],
+  "extra_mapped_keys": [],
+  "unused_hf_keys": [],
+  "uses_tied_output_embedding": true,
+  "out_head_source": "model.embed_tokens.weight",
+  "all_required_parameters_accounted_for": true,
+  "first_12_mappings": [
+    {
+      "custom_key": "tok_emb.weight",
+      "hf_key": "model.embed_tokens.weight",
+      "shape": [
+        151936,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.w_query.weight",
+      "hf_key": "model.layers.0.self_attn.q_proj.weight",
+      "shape": [
+        2048,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.w_keys.weight",
+      "hf_key": "model.layers.0.self_attn.k_proj.weight",
+      "shape": [
+        1024,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.w_values.weight",
+      "hf_key": "model.layers.0.self_attn.v_proj.weight",
+      "shape": [
+        1024,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.proj_out.weight",
+      "hf_key": "model.layers.0.self_attn.o_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.q_norm.weight",
+      "hf_key": "model.layers.0.self_attn.q_norm.weight",
+      "shape": [
+        128
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.att.k_norm.weight",
+      "hf_key": "model.layers.0.self_attn.k_norm.weight",
+      "shape": [
+        128
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.ff.fc1.weight",
+      "hf_key": "model.layers.0.mlp.gate_proj.weight",
+      "shape": [
+        3072,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.ff.fc2.weight",
+      "hf_key": "model.layers.0.mlp.up_proj.weight",
+      "shape": [
+        3072,
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.ff.fc3.weight",
+      "hf_key": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3072
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.rms_norm1.weight",
+      "hf_key": "model.layers.0.input_layernorm.weight",
+      "shape": [
+        1024
+      ],
+      "tied_from_embedding": false
+    },
+    {
+      "custom_key": "trf_blocks.0.rms_norm2.weight",
+      "hf_key": "model.layers.0.post_attention_layernorm.weight",
+      "shape": [
+        1024
+      ],
+      "tied_from_embedding": false
+    }
+  ]
+}
+Strict x32 GRPO checkpoint load successful.
+Parameter difference report
+{
+  "global_relative_parameter_difference": 0.00011902675810827381,
+  "sample_tensors": [
+    {
+      "key": "tok_emb.weight",
+      "base_norm": 357.5593566894531,
+      "diff_norm": 0.013802293688058853,
+      "relative_diff": 3.8601407140959054e-05
+    },
+    {
+      "key": "trf_blocks.0.att.w_query.weight",
+      "base_norm": 45.389015197753906,
+      "diff_norm": 0.008985120803117752,
+      "relative_diff": 0.00019795804109890014
+    },
+    {
+      "key": "trf_blocks.0.att.w_keys.weight",
+      "base_norm": 31.36880874633789,
+      "diff_norm": 0.00661389110609889,
+      "relative_diff": 0.00021084291802253574
+    },
+    {
+      "key": "trf_blocks.0.att.w_values.weight",
+      "base_norm": 27.26906967163086,
+      "diff_norm": 0.007355211302638054,
+      "relative_diff": 0.00026972725754603744
+    },
+    {
+      "key": "trf_blocks.0.att.proj_out.weight",
+      "base_norm": 37.37168502807617,
+      "diff_norm": 0.010786551050841808,
+      "relative_diff": 0.0002886289730668068
+    },
+    {
+      "key": "trf_blocks.0.att.q_norm.weight",
+      "base_norm": 25.727304458618164,
+      "diff_norm": 1.52587890625e-05,
+      "relative_diff": 5.930970701228944e-07
+    },
+    {
+      "key": "trf_blocks.0.att.k_norm.weight",
+      "base_norm": 110.69197845458984,
+      "diff_norm": 0.0,
+      "relative_diff": 0.0
+    },
+    {
+      "key": "trf_blocks.0.ff.fc1.weight",
+      "base_norm": 64.96942901611328,
+      "diff_norm": 0.01025597658008337,
+      "relative_diff": 0.00015785849245730788
+    },
+    {
+      "key": "trf_blocks.0.ff.fc2.weight",
+      "base_norm": 45.85912322998047,
+      "diff_norm": 0.012163637205958366,
+      "relative_diff": 0.00026523921405896544
+    },
+    {
+      "key": "trf_blocks.0.ff.fc3.weight",
+      "base_norm": 46.54250717163086,
+      "diff_norm": 0.012280648574233055,
+      "relative_diff": 0.00026385876117274165
+    },
+    {
+      "key": "trf_blocks.0.rms_norm1.weight",
+      "base_norm": 6.096553802490234,
+      "diff_norm": 0.0,
+      "relative_diff": 0.0
+    },
+    {
+      "key": "trf_blocks.0.rms_norm2.weight",
+      "base_norm": 16.389406204223633,
+      "diff_norm": 2.028800554398913e-05,
+      "relative_diff": 1.237873107129417e-06
+    }
+  ]
+}
+Forward-pass sanity check
+{
+  "logits_shape": [
+    1,
+    35,
+    151936
+  ],
+  "hidden_shape": [
+    1,
+    28,
+    1024
+  ],
+  "vocab_dim_ok": true,
+  "num_layers_ok": true,
+  "hidden_dim_ok": true,
+  "logits_finite": true,
+  "hidden_finite": true
+}
+Loaded cached hidden states: representations/rq2_final/rl_hidden_states.pt (400, 28, 1024)
+
+base probe layer 1
+==================
+Fold 1: acc=0.9750, bal_acc=0.9750, auroc=0.9969
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=0.9125, bal_acc=0.9125, auroc=0.9838
+Fold 4: acc=0.9500, bal_acc=0.9500, auroc=0.9950
+Fold 5: acc=0.9875, bal_acc=0.9875, auroc=0.9962
+Accuracy: 0.9625 +/- 0.0285
+AUROC   : 0.9944 +/- 0.0056
+
+base probe layer 2
+==================
+Fold 1: acc=0.9625, bal_acc=0.9625, auroc=0.9944
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=0.9125, bal_acc=0.9125, auroc=0.9862
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 5: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Accuracy: 0.9700 +/- 0.0312
+AUROC   : 0.9960 +/- 0.0053
+
+base probe layer 3
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=0.9875, bal_acc=0.9875, auroc=0.9987
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9900 +/- 0.0050
+AUROC   : 0.9996 +/- 0.0005
+
+base probe layer 4
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9999 +/- 0.0002
+
+base probe layer 5
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9981
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9996 +/- 0.0008
+
+base probe layer 6
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9925
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9985 +/- 0.0030
+
+base probe layer 7
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9956
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9991 +/- 0.0018
+
+base probe layer 8
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9950
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9990 +/- 0.0020
+
+base probe layer 9
+==================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9975
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9995 +/- 0.0010
+
+base probe layer 10
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9999 +/- 0.0002
+
+base probe layer 11
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9999 +/- 0.0002
+
+base probe layer 12
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 13
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 14
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 15
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9999 +/- 0.0002
+
+base probe layer 16
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 17
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9999 +/- 0.0002
+
+base probe layer 18
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 19
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 20
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 21
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 22
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 23
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 24
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 25
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 26
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 27
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+base probe layer 28
+===================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 1
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9950
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=0.9125, bal_acc=0.9125, auroc=0.9819
+Fold 4: acc=0.9625, bal_acc=0.9625, auroc=0.9969
+Fold 5: acc=0.9750, bal_acc=0.9750, auroc=0.9987
+Accuracy: 0.9650 +/- 0.0278
+AUROC   : 0.9945 +/- 0.0065
+
+grpo_gsm8k_think probe layer 2
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9900
+Fold 2: acc=0.9750, bal_acc=0.9750, auroc=1.0000
+Fold 3: acc=0.9125, bal_acc=0.9125, auroc=0.9894
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=0.9981
+Fold 5: acc=0.9750, bal_acc=0.9750, auroc=1.0000
+Accuracy: 0.9675 +/- 0.0281
+AUROC   : 0.9955 +/- 0.0048
+
+grpo_gsm8k_think probe layer 3
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9981
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=0.9875, bal_acc=0.9875, auroc=0.9994
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9925 +/- 0.0061
+AUROC   : 0.9995 +/- 0.0007
+
+grpo_gsm8k_think probe layer 4
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9975
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 0.9995 +/- 0.0010
+
+grpo_gsm8k_think probe layer 5
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9981
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9996 +/- 0.0008
+
+grpo_gsm8k_think probe layer 6
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=0.9975
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 0.9995 +/- 0.0010
+
+grpo_gsm8k_think probe layer 7
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9950 +/- 0.0061
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 8
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 9
+==============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 10
+===============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 11
+===============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 12
+===============================
+Fold 1: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 13
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 14
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 15
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 16
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 17
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 18
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 19
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 20
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 21
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 22
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 23
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 24
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 25
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 26
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 27
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=0.9875, bal_acc=0.9875, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 0.9975 +/- 0.0050
+AUROC   : 1.0000 +/- 0.0000
+
+grpo_gsm8k_think probe layer 28
+===============================
+Fold 1: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 2: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 3: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 4: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Fold 5: acc=1.0000, bal_acc=1.0000, auroc=1.0000
+Accuracy: 1.0000 +/- 0.0000
+AUROC   : 1.0000 +/- 0.0000
+
+<Figure size 900x500 with 1 Axes>
+<Figure size 900x500 with 1 Axes>
+<Figure size 900x500 with 1 Axes>
+<Figure size 900x500 with 1 Axes>
+
+============================================================
+RQ2 FINAL EXPERIMENT — RL REPRESENTATION STABILITY
+============================================================
+
+A. Research question
+Does GRPO preserve or reorganize the reasoning-oriented vs factual-recall representation found in base Qwen3-0.6B?
+
+B. Models
+Base: custom Qwen3-0.6B base implementation
+RL  : x32/Qwen3-0.6B-GRPO-GSM8K-Think safetensors checkpoint from x32/Qwen3-0.6B-GRPO-GSM8K-Think
+
+C. Dataset
+Same 400-example controlled RQ1 dataset: 200 reasoning-oriented, 200 factual-recall.
+
+D. Representation extraction
+Same final formatted prompt-token representation, [400, 28, 1024].
+
+E. Direction stability
+Mean-direction cosine: {'mean': 0.4533668426530702, 'std': 0.1794287403529776, 'median': 0.49185261130332947, 'min': 0.17337971925735474, 'max': 0.9434069395065308, 'values': [0.9434069395065308, 0.778103232383728, 0.7146371006965637, 0.6194868087768555, 0.5176733732223511, 0.5503105521202087, 0.4999014139175415, 0.41896146535873413, 0.29431620240211487, 0.3451370596885681, 0.2875833511352539, 0.2868042588233948, 0.23932597041130066, 0.17652694880962372, 0.17337971925735474, 0.18645137548446655, 0.2453661412000656, 0.4053162932395935, 0.4493977725505829, 0.43889376521110535, 0.494537353515625, 0.5115969181060791, 0.5160297155380249, 0.5153206586837769, 0.529198169708252, 0.5435721278190613, 0.5238690376281738, 0.48916786909103394]}
+Probe-direction cosine: {'mean': 0.44479447198765626, 'std': 0.18196189586599043, 'median': 0.4393275618553162, 'min': 0.1728260338306427, 'max': 0.9425763249397278, 'values': [0.9425763249397278, 0.7724740982055665, 0.7462892532348633, 0.7017550706863404, 0.6015203356742859, 0.610212779045105, 0.4932021081447601, 0.417171311378479, 0.2727853298187256, 0.2841669380664825, 0.2602460503578186, 0.259557318687439, 0.23764565587043762, 0.21434297859668733, 0.1728260338306427, 0.2468612402677536, 0.2911496102809906, 0.43459729552268983, 0.455679327249527, 0.42102445363998414, 0.43180587887763977, 0.4440578281879425, 0.4523340821266174, 0.42983209490776064, 0.4607332646846771, 0.48144123554229734, 0.4688978672027588, 0.4490594506263733]}
+
+F. Representation drift
+{'mean_drift_across_layers': 0.24088645264107203, 'max_drift_layer': {'layer': 28.0, 'cosine_mean': 0.48937827348709106, 'cosine_std': 0.09816420823335648, 'cosine_median': 0.4862460196018219, 'drift_mean': 0.5106217265129089, 'drift_std': 0.09816420823335648, 'drift_median': 0.5137540102005005}, 'min_drift_layer': {'layer': 1.0, 'cosine_mean': 0.987209141254425, 'cosine_std': 0.0007614859496243298, 'cosine_median': 0.9874088168144226, 'drift_mean': 0.012790814973413944, 'drift_std': 0.0007614859496243298, 'drift_median': 0.012591183185577393}}
+
+G. Probe performance
+Best base: {'model': 'base', 'layer': 12, 'accuracy_mean': 0.9974999999999999, 'accuracy_std': 0.004999999999999982, 'balanced_accuracy_mean': 0.9974999999999999, 'balanced_accuracy_std': 0.004999999999999982, 'auroc_mean': 1.0, 'auroc_std': 0.0}
+Best RL  : {'model': 'rl_grpo_step00500', 'layer': 7, 'accuracy_mean': 0.9949999999999999, 'accuracy_std': 0.006123724356957924, 'balanced_accuracy_mean': 0.9949999999999999, 'balanced_accuracy_std': 0.006123724356957924, 'auroc_mean': 1.0, 'auroc_std': 0.0}
+
+H. Main interpretation
+RL substantially reorganizes the task-group separating direction.
+
+I. Scientific caveats
+- Only one RL checkpoint is analyzed.
+- Only one model family is analyzed.
+- The checkpoint is public rather than trained in this project.
+- Direction stability does not establish causal reasoning-mechanism stability.
+- Lexical/task-domain confounding from RQ1 remains.
+
+J. Recommendation for paper
+INCLUDE RQ2
+
+Saved paths
+{
+  "results": {
+    "results": {
+      "base_hidden_states": "representations/rq2_final/base_hidden_states.pt",
+      "base_final_layer": "representations/rq2_final/base_final_layer.pt",
+      "rl_hidden_states": "representations/rq2_final/rl_hidden_states.pt",
+      "rl_final_layer": "representations/rq2_final/rl_final_layer.pt",
+      "direction_cosine_by_layer_csv": "results/rq2_final/direction_cosine_by_layer.csv",
+      "direction_cosine_by_layer_json": "results/rq2_final/direction_cosine_by_layer.json",
+      "representation_drift_by_layer_csv": "results/rq2_final/representation_drift_by_layer.csv",
+      "representation_drift_by_layer_json": "results/rq2_final/representation_drift_by_layer.json",
+      "base_vs_rl_probe_results_csv": "results/rq2_final/base_vs_rl_probe_results.csv",
+      "probe_direction_cosines_csv": "results/rq2_final/probe_direction_cosines.csv"
+    },
+    "figures": {
+      "direction_stability": "figures/rq2_final/direction_stability.png",
+      "representation_drift": "figures/rq2_final/representation_drift.png",
+      "probe_performance": "figures/rq2_final/probe_performance.png",
+      "probe_direction_stability": "figures/rq2_final/probe_direction_stability.png"
+    }
+  },
+  "figures": {
+    "direction_stability": "figures/rq2_final/direction_stability.png",
+    "representation_drift": "figures/rq2_final/representation_drift.png",
+    "probe_performance": "figures/rq2_final/probe_performance.png",
+    "probe_direction_stability": "figures/rq2_final/probe_direction_stability.png"
+  }
+}
+Saved final strict x32 RQ2 summary: results/rq2_final/rq2_final_summary.json
