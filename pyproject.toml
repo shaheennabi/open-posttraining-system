@@ -4,15 +4,21 @@ version = "0.1.0"
 description = "Post-training system for reasoning models"
 authors = [{name = "Shaheen Nabi"}]
 dependencies = [
-    "torch",
-    "transformers",
-    "huggingface_hub>=0.23.0",
-    "tokenizers",
+    "transformers==4.57.6",
+    "huggingface_hub==0.36.2",
+    "tokenizers==0.22.2",
     "from-root",
     "datasets",
     "requests",
-    "safetensors",
+    "safetensors==0.7.0",
     "sympy",
+    "matplotlib",
+    "scikit-learn",
+    "jax[cpu]",
+    "flax",
+    "optax",
+    "orbax-checkpoint",
+    "chex",
 ]
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
