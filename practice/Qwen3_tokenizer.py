@@ -1,4 +1,3 @@
-
 # Qwen3 Tokenizer: Byte-Level BPE Implementation
 
 import unicodedata
@@ -19,35 +18,75 @@ TOKENIZER_CONFIG_PATH = TOKENIZER_PATH.with_name("tokenizer_config.json")
 
 # NFC unicode normalization
 def normalize_text(text):
+    """
+    Apply NFC unicode normalization.
+
+    Composes characters that can be written two ways into one canonical form,
+    e.g. "e" + combining accent -> "é". Qwen3's tokenizer.json uses NFC as its
+    normalizer, so the same text always produces the same token IDs.
+
+    Args:
+        text: any string.
+    Returns:
+        the NFC-normalized string.
+    """
     return unicodedata.normalize("NFC", text)
 
 
 # Qwen3 pre-tokenization
 PRETOKEN_PATTERN = (
-    r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|"
-    r"[^\r\n\p{L}\p{N}]?\p{L}+|"
-    r"\p{N}|"
-    r" ?[^\s\p{L}\p{N}]+[\r\n]*|"
-    r"\s*[\r\n]+|"
-    r"\s+(?!\S)|"
-    r"\s+"
+    r"(?i:'s|'t|'re|'ve|'m|'ll|'d)|"        # English contractions: 's 't 're 've 'm 'll 'd
+    r"[^\r\n\p{L}\p{N}]?\p{L}+|"            # a word, with one optional leading non-letter (e.g. a space)
+    r"\p{N}|"                               # numbers: one digit at a time
+    r" ?[^\s\p{L}\p{N}]+[\r\n]*|"           # punctuation/symbols, plus trailing newlines
+    r"\s*[\r\n]+|"                          # blank lines and newlines
+    r"\s+(?!\S)|"                           # whitespace that is not followed by a word
+    r"\s+"                                  # any remaining whitespace
 )
 
 PRETOKEN_RE = regex.compile(PRETOKEN_PATTERN)
 
 
 def pre_tokenize(text):
+    """
+    Split text into pre-tokens (the chunks that BPE runs on separately).
+
+    BPE never merges across pre-token boundaries, so this regex decides which
+    pieces of text can ever become one token. Digits are split one by one.
+
+    Example:
+        "Hello, world 123" -> ['Hello', ',', ' world', ' ', '1', '2', '3']
+
+    Args:
+        text: an (already normalized) string.
+    Returns:
+        list of pre-token strings that together cover the whole input.
+    """
     return [match.group() for match in PRETOKEN_RE.finditer(text)]
 
 
 # Byte-level encoding
 def bytes_to_unicode():
+    """
+    Build the byte-level table: every byte value (0-255) -> a visible unicode character.
 
+    Printable bytes keep their own character ('A' -> 'A'). The other bytes
+    (control characters, space, newline, ...) are shifted to unused code points
+    from 256 upward, e.g. space -> 'Ġ' and newline -> 'Ċ'. This is why the BPE
+    vocabulary contains tokens like 'Ġworld'. Every possible input can be
+    represented, so there are no unknown tokens.
+
+    Returns:
+        dict {byte value: character}.
+    """
+
+    # bytes that already map to a printable character
     bs = (list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1)))
 
     cs = bs[:]
     n = 0
 
+    # every other byte gets a new character starting at code point 256
     for b in range(256):
         if b not in bs:
             bs.append(b)
@@ -62,11 +101,33 @@ BYTE_DECODER = {v: k for k, v in BYTE_ENCODER.items()}
 
 
 def byte_level_encode(text):
+    """
+    Convert a pre-token into its byte-level form.
+
+    The text is encoded to UTF-8 bytes and each byte is replaced by its
+    visible character. This is the alphabet the BPE merges are defined on.
+
+    Example:
+        " world" -> "Ġworld"        "é" -> "Ã©" (two bytes)
+
+    Args:
+        text: one pre-token string.
+    Returns:
+        string with one character per UTF-8 byte.
+    """
     return "".join(BYTE_ENCODER[b] for b in text.encode("utf-8"))
 
 
 # Load tokenizer JSON files
 def loading_tokenizer(path):
+    """
+    Load tokenizer.json (vocabulary, merges and added tokens).
+
+    Args:
+        path: path to tokenizer.json.
+    Returns:
+        the parsed JSON as a dict. Raises FileNotFoundError if the file is missing.
+    """
 
     path = Path(path)
 
@@ -78,6 +139,14 @@ def loading_tokenizer(path):
 
 
 def loading_tokenizer_config(path):
+    """
+    Load tokenizer_config.json (special tokens, chat template, defaults).
+
+    Args:
+        path: path to tokenizer_config.json.
+    Returns:
+        the parsed JSON as a dict, or an empty dict if the file does not exist.
+    """
 
     path = Path(path)
 
@@ -89,8 +158,25 @@ def loading_tokenizer_config(path):
 
 
 class Qwen3Tokenizer:
+    """
+    Byte-level BPE tokenizer for Qwen3, built only from tokenizer.json and tokenizer_config.json.
+
+    Encoding pipeline:
+        text -> split around added tokens -> NFC -> pre-tokenize -> bytes -> BPE merges -> token IDs
+    Decoding reverses it: token IDs -> byte-level characters -> bytes -> UTF-8 text.
+    """
 
     def __init__(self, tokenizer_path=TOKENIZER_PATH, apply_chat_template=False, add_generation_prompt=False, add_thinking=False, tokenizer_config_path=None):
+        """
+        Load everything the tokenizer needs once, at construction time.
+
+        Args:
+            tokenizer_path: path to tokenizer.json.
+            apply_chat_template: if True, encode() wraps plain text in the chat template by default.
+            add_generation_prompt: default for the generation prompt (the open assistant turn) when wrapping.
+            add_thinking: default for the template's enable_thinking flag when wrapping.
+            tokenizer_config_path: path to tokenizer_config.json (defaults to the file next to tokenizer.json).
+        """
 
         # Load tokenizer data and configuration
         self.tokenizer_data = loading_tokenizer(tokenizer_path)
@@ -106,19 +192,24 @@ class Qwen3Tokenizer:
         self.default_enable_thinking = add_thinking
 
         # Vocabulary and reverse vocabulary
-        self.vocabulary = self.tokenizer_data["model"]["vocab"]
+        self.vocabulary = self.tokenizer_data["model"]["vocab"]                       # token string -> id
 
-        self.reverse_vocabulary = {token_id: token for token, token_id in self.vocabulary.items()}
+        self.reverse_vocabulary = {token_id: token for token, token_id in self.vocabulary.items()}   # id -> token string
 
         # Merge ranks
         self.merge_ranks = {}
 
         for rank, merge in enumerate(self.tokenizer_data["model"]["merges"]):
 
+            # older files store merges as "a b" strings, newer ones as ["a", "b"] lists
             if isinstance(merge, str):
                 merge = merge.split(" ", 1)
 
+            # rank = position in the merge list; a lower rank was learned earlier, so it merges first
             self.merge_ranks[tuple(merge)] = rank
+
+        # Cache of already merged pieces (BPE is deterministic, so repeated words are free)
+        self.bpe_cache = {}
 
         # Added tokens
         added_tokens = self.tokenizer_data.get("added_tokens", [])
@@ -162,6 +253,7 @@ class Qwen3Tokenizer:
             if self._get_token_id(token) is not None
         }
 
+        # ids that skip_special_tokens removes when decoding
         self.special_token_ids = set(self.special_tokens.values())
 
         # Configuration
@@ -195,51 +287,34 @@ class Qwen3Tokenizer:
             if token_id is not None
         }
 
-        self.model_max_length = self.tokenizer_config.get(
-            "model_max_length"
-        )
+        self.model_max_length = self.tokenizer_config.get("model_max_length")
 
-        self.padding_side = self.tokenizer_config.get(
-            "padding_side", "right"
-        )
+        self.padding_side = self.tokenizer_config.get("padding_side", "right")
 
-        self.truncation_side = self.tokenizer_config.get(
-            "truncation_side", "right"
-        )
+        self.truncation_side = self.tokenizer_config.get("truncation_side", "right")
 
         self.errors = self.tokenizer_config.get("errors", "replace")
 
-        self.clean_up_tokenization_spaces = self.tokenizer_config.get(
-            "clean_up_tokenization_spaces", False
-        )
+        self.clean_up_tokenization_spaces = self.tokenizer_config.get("clean_up_tokenization_spaces", False)
 
-        self.tokenizer_class = self.tokenizer_config.get(
-            "tokenizer_class"
-        )
+        self.tokenizer_class = self.tokenizer_config.get("tokenizer_class")
 
         # Chat template
         self.chat_template = self.tokenizer_config.get("chat_template")
 
         self.chat_template_renderer = None
 
+        # compile the Jinja chat template once, so it can be rendered many times
         if self.chat_template and Environment is not None:
             self.chat_template_renderer = Environment(
-                autoescape=False
-            ).from_string(self.chat_template)
+                autoescape=False).from_string(self.chat_template)
 
         # Split around all added tokens, longest first
-        added_token_strings = sorted(
-            self.added_token_to_id,
-            key=len,
-            reverse=True
-        )
+        added_token_strings = sorted(self.added_token_to_id, key=len, reverse=True)
 
         if added_token_strings:
-
-            pattern = "(" + "|".join(
-                re.escape(token) for token in added_token_strings
-            ) + ")"
-
+            # the parentheses make re.split keep the matched added tokens in its output
+            pattern = "(" + "|".join(re.escape(token) for token in added_token_strings) + ")"
             self.added_token_pattern = re.compile(pattern)
 
         else:
@@ -249,6 +324,13 @@ class Qwen3Tokenizer:
     # Get token content from configuration
     @staticmethod
     def _get_token_content(token):
+        """
+        Read a token string from the config.
+
+        tokenizer_config.json stores a token either as a plain string or as a
+        dict with a "content" field. This returns the string in both cases
+        (None stays None, e.g. Qwen3 has no BOS token).
+        """
 
         if isinstance(token, dict):
             return token.get("content")
@@ -258,19 +340,46 @@ class Qwen3Tokenizer:
 
     # Get token ID
     def _get_token_id(self, token):
+        """
+        Look up the id of a token string.
+
+        Added tokens (like <|im_end|>) are checked first, then the normal BPE
+        vocabulary.
+
+        Args:
+            token: a token string, or None.
+        Returns:
+            the integer id, or None if the token is None or unknown.
+        """
 
         if token is None:
             return None
 
-        return self.added_token_to_id.get(
-            token,
-            self.vocabulary.get(token)
-        )
+        return self.added_token_to_id.get(token, self.vocabulary.get(token))
 
 
     # BPE merge algorithm
     def apply_bpe(self, byte_piece):
+        """
+        Run byte-pair encoding on one byte-level pre-token.
 
+        Start from single characters, then repeatedly merge the adjacent pair
+        with the lowest merge rank until no pair in the merge list is left.
+
+        Example (with merges "h e", "he l", "hel l", "hell o"):
+            "hello" -> h e l l o -> he l l o -> hel l o -> hell o -> hello
+
+        Args:
+            byte_piece: a pre-token already converted by byte_level_encode().
+        Returns:
+            list of BPE token strings (each one is a key of the vocabulary).
+        """
+
+        # reuse the result if this exact piece was merged before
+        if byte_piece in self.bpe_cache:
+            return self.bpe_cache[byte_piece]
+
+        # start with one symbol per byte-level character
         symbols = list(byte_piece)
 
         while len(symbols) > 1:
@@ -282,14 +391,12 @@ class Qwen3Tokenizer:
                 if (symbols[i], symbols[i + 1]) in self.merge_ranks
             }
 
+            # stop when no adjacent pair can be merged
             if not available_pairs:
                 break
 
             # Merge the pair with the lowest rank
-            best_pair = min(
-                available_pairs,
-                key=self.merge_ranks.__getitem__
-            )
+            best_pair = min(available_pairs, key=self.merge_ranks.__getitem__)
 
             merged_symbols = []
             i = 0
@@ -297,24 +404,35 @@ class Qwen3Tokenizer:
             # Merge all non-overlapping occurrences
             while i < len(symbols):
 
-                if (
-                    i + 1 < len(symbols)
-                    and (symbols[i], symbols[i + 1]) == best_pair
-                ):
-                    merged_symbols.append(symbols[i] + symbols[i + 1])
+                if (i + 1 < len(symbols) and (symbols[i], symbols[i + 1]) == best_pair):
+                    merged_symbols.append(symbols[i] + symbols[i + 1])   # the two symbols become one
                     i += 2
-
                 else:
                     merged_symbols.append(symbols[i])
                     i += 1
 
             symbols = merged_symbols
 
+        self.bpe_cache[byte_piece] = symbols
+
         return symbols
 
 
     # Encode text into token IDs
     def encode(self, text, chat_wrapped=None):
+        """
+        Turn text into a list of token IDs.
+
+        Steps: optionally wrap in the chat template -> split around added tokens
+        -> for ordinary text: NFC, pre-tokenize, bytes, BPE, vocabulary lookup.
+        Added tokens such as <|im_start|> map directly to their ids.
+
+        Args:
+            text: the string to encode.
+            chat_wrapped: wrap the text as a user chat message first; None uses the constructor default.
+        Returns:
+            list of integer token ids.
+        """
 
         if not isinstance(text, str):
             raise TypeError("encode() expects a string")
@@ -329,18 +447,14 @@ class Qwen3Tokenizer:
         if self.add_prefix_space and text and not text.startswith(" "):
             text = " " + text
 
-        text = normalize_text(text)
-
         # Separate added tokens from ordinary text
+        # (added tokens are matched on the raw text; normalization only applies to ordinary text)
         if self.added_token_pattern:
-            parts = [
-                part for part in self.added_token_pattern.split(text)
-                if part]
+            parts = [part for part in self.added_token_pattern.split(text) if part]
         else:
             parts = [text]
 
         token_ids = []
-
         for part in parts:
 
             # Added tokens map directly to IDs
@@ -348,18 +462,16 @@ class Qwen3Tokenizer:
                 token_ids.append(self.added_token_to_id[part])
 
             else:
-
-                # Ordinary text -> pre-tokenization -> bytes -> BPE
-                for piece in pre_tokenize(part):
-
-                    byte_piece = byte_level_encode(piece)
-                    bpe_tokens = self.apply_bpe(byte_piece)
+                # Ordinary text -> NFC -> pre-tokenization -> bytes -> BPE
+                for piece in pre_tokenize(normalize_text(part)):
+                    byte_piece = byte_level_encode(piece)           # pre-token -> byte-level characters
+                    bpe_tokens = self.apply_bpe(byte_piece)         # merge into BPE tokens
 
                     for token in bpe_tokens:
                         if token not in self.vocabulary:
                             raise KeyError(f"BPE token not found in vocabulary: {token!r}")
 
-                        token_ids.append(self.vocabulary[token])
+                        token_ids.append(self.vocabulary[token])    # token string -> id
 
         # Add configured BOS/EOS tokens when enabled
         if self.add_bos_token and self.bos_token_id is not None:
@@ -373,6 +485,20 @@ class Qwen3Tokenizer:
 
     # Decode token IDs back into text
     def decode(self, token_ids, skip_special_tokens=False):
+        """
+        Turn token IDs back into text.
+
+        Ordinary tokens are collected as bytes and decoded together, so a UTF-8
+        character that is split across several tokens (like an emoji) comes out
+        correctly. Added tokens are written out directly as their text.
+
+        Args:
+            token_ids: iterable of ids (ints, numpy or jax integers).
+            skip_special_tokens: drop special tokens such as <|im_end|> (non-special
+                added tokens like <think> are kept).
+        Returns:
+            the decoded string. Raises ValueError for an id the tokenizer does not know.
+        """
 
         decoded_text = []
         byte_buffer = []
@@ -400,6 +526,7 @@ class Qwen3Tokenizer:
 
                 token = self.reverse_vocabulary[token_id]
 
+                # each character of the token stands for one byte
                 byte_buffer.extend(BYTE_DECODER[char] for char in token)
 
         # Decode remaining bytes
@@ -411,6 +538,21 @@ class Qwen3Tokenizer:
 
     # Apply Qwen3 chat template
     def apply_chat_template(self, messages, tools=None, add_generation_prompt=False, enable_thinking=None):
+        """
+        Render a conversation into Qwen3's chat format as text (no tokenization).
+
+        Uses the Jinja template from tokenizer_config.json, so the result is
+        "<|im_start|>role\\ncontent<|im_end|>\\n" per message.
+
+        Args:
+            messages: a string (one user message) or a list of {"role", "content"} dicts.
+            tools: optional list of tool definitions.
+            add_generation_prompt: add the opening "<|im_start|>assistant\\n" so the model continues from there.
+            enable_thinking: False adds an empty <think></think> block to switch thinking off;
+                None leaves the template default (thinking on).
+        Returns:
+            the formatted string.
+        """
 
         if not self.chat_template:
             raise ValueError("No chat template found in tokenizer configuration")
@@ -432,6 +574,7 @@ class Qwen3Tokenizer:
             "add_generation_prompt": add_generation_prompt
         }
 
+        # only pass enable_thinking when set: an undefined variable means "template default"
         if enable_thinking is not None:
             template_inputs["enable_thinking"] = enable_thinking
 
@@ -440,6 +583,14 @@ class Qwen3Tokenizer:
 
     # Wrap a single user message (previous interface)
     def _wrap_chat(self, user_msg, add_generation_prompt=None, enable_thinking=None, tools=None):
+        """
+        Format one user message with the chat template.
+
+        Any argument left as None falls back to the default given to the constructor.
+
+        Returns:
+            the formatted chat string.
+        """
 
         if add_generation_prompt is None:
             add_generation_prompt = self.default_add_generation_prompt
@@ -457,6 +608,17 @@ class Qwen3Tokenizer:
 
     # Format a conversation and encode it
     def encode_chat(self, user_msg, add_generation_prompt=True, enable_thinking=False, tools=None):
+        """
+        Format a conversation with the chat template and encode it to token IDs.
+
+        Args:
+            user_msg: a string (one user message) or a list of {"role", "content"} dicts.
+            add_generation_prompt: end with the open assistant turn (what you want before generating).
+            enable_thinking: False turns thinking off; None keeps the template default (thinking on).
+            tools: optional list of tool definitions.
+        Returns:
+            list of token ids. The template text is encoded as it is, with no second wrapping.
+        """
 
         # Support both a string and a list of messages
         if isinstance(user_msg, str):
@@ -476,6 +638,24 @@ class Qwen3Tokenizer:
         padding_side=None,
         truncation_side=None,
         pad_to_multiple_of=None):
+        """
+        Encode several texts into equal-length rows with attention masks.
+
+        Steps: validate the options -> encode each text -> truncate -> pad every
+        row to a common length -> build the attention mask (1 = real token, 0 = padding).
+
+        Args:
+            texts: list or tuple of strings.
+            padding: True or "longest" pads to the longest row, "max_length" pads to max_length, False or None leaves rows ragged.
+            truncation: cut rows longer than max_length (model_max_length if max_length is None).
+            max_length: target or maximum length in tokens.
+            return_attention_mask: include "attention_mask" in the result.
+            padding_side: "left" or "right" (defaults to the tokenizer config).
+            truncation_side: which end to cut, "left" or "right".
+            pad_to_multiple_of: round the padded length up to a multiple of this number.
+        Returns:
+            dict with "input_ids" (and "attention_mask") as lists of lists.
+        """
 
         if isinstance(texts, str) or not isinstance(texts, (list, tuple)):
             raise TypeError("encode_batch() expects a list or tuple of strings")
@@ -485,9 +665,7 @@ class Qwen3Tokenizer:
 
         # Validate options
         if padding not in (True, False, "longest", "max_length", None):
-            raise ValueError(
-                "padding must be True, False, 'longest', or 'max_length'"
-            )
+            raise ValueError("padding must be True, False, 'longest', or 'max_length'")
 
         if not isinstance(truncation, bool):
             raise TypeError("truncation must be a boolean")
@@ -542,19 +720,15 @@ class Qwen3Tokenizer:
             for i, sequence in enumerate(sequences):
 
                 if len(sequence) > max_length:
-
                     if truncation_side == "right":
-                        sequences[i] = sequence[:max_length]
+                        sequences[i] = sequence[:max_length]      # keep the beginning
 
                     else:
-                        sequences[i] = sequence[-max_length:]
+                        sequences[i] = sequence[-max_length:]     # keep the end
 
         # Determine target batch length
         if padding in (True, "longest"):
-            target_length = max(
-                (len(sequence) for sequence in sequences),
-                default=0
-            )
+            target_length = max((len(sequence) for sequence in sequences), default=0)
 
         elif padding == "max_length":
             target_length = max_length
@@ -565,6 +739,7 @@ class Qwen3Tokenizer:
         # Pad to a multiple if requested
         if target_length is not None and pad_to_multiple_of is not None:
 
+            # round up to the next multiple
             target_length = ((target_length + pad_to_multiple_of - 1) // pad_to_multiple_of) * pad_to_multiple_of
 
         # Pad sequences and construct attention masks
@@ -573,12 +748,11 @@ class Qwen3Tokenizer:
 
         for sequence in sequences:
 
-            mask = [1] * len(sequence)
+            mask = [1] * len(sequence)      # 1 for every real token
 
             if target_length is not None:
 
                 pad_length = target_length - len(sequence)
-
                 if pad_length < 0:
                     raise ValueError("A sequence exceeds the padding length. Enable truncation.")
 
@@ -588,7 +762,7 @@ class Qwen3Tokenizer:
                         raise ValueError("No padding token ID found in tokenizer configuration")
 
                     pad_tokens = [self.pad_token_id] * pad_length
-                    pad_mask = [0] * pad_length
+                    pad_mask = [0] * pad_length                      # 0 for every padding position
 
                     if padding_side == "right":
                         sequence = sequence + pad_tokens
