@@ -43,11 +43,7 @@ def pre_tokenize(text):
 # Byte-level encoding
 def bytes_to_unicode():
 
-    bs = (
-        list(range(ord("!"), ord("~") + 1))
-        + list(range(ord("¡"), ord("¬") + 1))
-        + list(range(ord("®"), ord("ÿ") + 1))
-    )
+    bs = (list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1)))
 
     cs = bs[:]
     n = 0
@@ -94,26 +90,15 @@ def loading_tokenizer_config(path):
 
 class Qwen3Tokenizer:
 
-    def __init__(
-        self,
-        tokenizer_path=TOKENIZER_PATH,
-        apply_chat_template=False,
-        add_generation_prompt=False,
-        add_thinking=False,
-        tokenizer_config_path=None
-    ):
+    def __init__(self, tokenizer_path=TOKENIZER_PATH, apply_chat_template=False, add_generation_prompt=False, add_thinking=False, tokenizer_config_path=None):
 
         # Load tokenizer data and configuration
         self.tokenizer_data = loading_tokenizer(tokenizer_path)
 
         if tokenizer_config_path is None:
-            tokenizer_config_path = Path(tokenizer_path).with_name(
-                "tokenizer_config.json"
-            )
+            tokenizer_config_path = Path(tokenizer_path).with_name("tokenizer_config.json")
 
-        self.tokenizer_config = loading_tokenizer_config(
-            tokenizer_config_path
-        )
+        self.tokenizer_config = loading_tokenizer_config(tokenizer_config_path)
 
         # Chat defaults (compatible with previous interface)
         self.default_chat_wrapping = apply_chat_template
@@ -123,10 +108,7 @@ class Qwen3Tokenizer:
         # Vocabulary and reverse vocabulary
         self.vocabulary = self.tokenizer_data["model"]["vocab"]
 
-        self.reverse_vocabulary = {
-            token_id: token
-            for token, token_id in self.vocabulary.items()
-        }
+        self.reverse_vocabulary = {token_id: token for token, token_id in self.vocabulary.items()}
 
         # Merge ranks
         self.merge_ranks = {}
@@ -146,10 +128,7 @@ class Qwen3Tokenizer:
 
             added_tokens = []
 
-            for token_id, token in self.tokenizer_config.get(
-                "added_tokens_decoder", {}
-            ).items():
-
+            for token_id, token in self.tokenizer_config.get("added_tokens_decoder", {}).items():
                 entry = dict(token)
                 entry["id"] = int(token_id)
                 added_tokens.append(entry)
@@ -173,10 +152,7 @@ class Qwen3Tokenizer:
 
         self.additional_special_tokens = [
             token["content"] if isinstance(token, dict) else token
-            for token in self.tokenizer_config.get(
-                "additional_special_tokens", []
-            )
-        ]
+            for token in self.tokenizer_config.get("additional_special_tokens", [])]
 
         special_token_strings.update(self.additional_special_tokens)
 
@@ -193,21 +169,13 @@ class Qwen3Tokenizer:
         self.add_eos_token = self.tokenizer_config.get("add_eos_token", False)
         self.add_prefix_space = self.tokenizer_config.get("add_prefix_space", False)
 
-        self.bos_token = self._get_token_content(
-            self.tokenizer_config.get("bos_token")
-        )
+        self.bos_token = self._get_token_content(self.tokenizer_config.get("bos_token"))
 
-        self.eos_token = self._get_token_content(
-            self.tokenizer_config.get("eos_token")
-        )
+        self.eos_token = self._get_token_content(self.tokenizer_config.get("eos_token"))
 
-        self.pad_token = self._get_token_content(
-            self.tokenizer_config.get("pad_token")
-        )
+        self.pad_token = self._get_token_content(self.tokenizer_config.get("pad_token"))
 
-        self.unk_token = self._get_token_content(
-            self.tokenizer_config.get("unk_token")
-        )
+        self.unk_token = self._get_token_content(self.tokenizer_config.get("unk_token"))
 
         # Token IDs
         self.bos_token_id = self._get_token_id(self.bos_token)
@@ -356,11 +324,7 @@ class Qwen3Tokenizer:
             chat_wrapped = self.default_chat_wrapping
 
         if chat_wrapped:
-            text = self._wrap_chat(
-                text,
-                add_generation_prompt=self.default_add_generation_prompt,
-                enable_thinking=self.default_enable_thinking
-            )
+            text = self._wrap_chat(text, add_generation_prompt=self.default_add_generation_prompt, enable_thinking=self.default_enable_thinking)
 
         if self.add_prefix_space and text and not text.startswith(" "):
             text = " " + text
@@ -371,8 +335,7 @@ class Qwen3Tokenizer:
         if self.added_token_pattern:
             parts = [
                 part for part in self.added_token_pattern.split(text)
-                if part
-            ]
+                if part]
         else:
             parts = [text]
 
@@ -390,14 +353,11 @@ class Qwen3Tokenizer:
                 for piece in pre_tokenize(part):
 
                     byte_piece = byte_level_encode(piece)
-
                     bpe_tokens = self.apply_bpe(byte_piece)
 
                     for token in bpe_tokens:
                         if token not in self.vocabulary:
-                            raise KeyError(
-                                f"BPE token not found in vocabulary: {token!r}"
-                            )
+                            raise KeyError(f"BPE token not found in vocabulary: {token!r}")
 
                         token_ids.append(self.vocabulary[token])
 
@@ -418,7 +378,6 @@ class Qwen3Tokenizer:
         byte_buffer = []
 
         for token_id in token_ids:
-
             token_id = int(token_id)
 
             # Added tokens are decoded directly
@@ -426,22 +385,12 @@ class Qwen3Tokenizer:
 
                 # Decode preceding ordinary tokens first
                 if byte_buffer:
-                    decoded_text.append(
-                        bytes(byte_buffer).decode(
-                            "utf-8",
-                            errors=self.errors
-                        )
-                    )
+                    decoded_text.append(bytes(byte_buffer).decode("utf-8", errors=self.errors))
                     byte_buffer = []
 
                 # Optionally skip special tokens
-                if not (
-                    skip_special_tokens
-                    and token_id in self.special_token_ids
-                ):
-                    decoded_text.append(
-                        self.id_to_added_token[token_id]
-                    )
+                if not (skip_special_tokens and token_id in self.special_token_ids):
+                    decoded_text.append(self.id_to_added_token[token_id])
 
             else:
 
@@ -451,44 +400,27 @@ class Qwen3Tokenizer:
 
                 token = self.reverse_vocabulary[token_id]
 
-                byte_buffer.extend(
-                    BYTE_DECODER[char] for char in token
-                )
+                byte_buffer.extend(BYTE_DECODER[char] for char in token)
 
         # Decode remaining bytes
         if byte_buffer:
-            decoded_text.append(
-                bytes(byte_buffer).decode(
-                    "utf-8",
-                    errors=self.errors
-                )
-            )
+            decoded_text.append(bytes(byte_buffer).decode("utf-8", errors=self.errors))
 
         return "".join(decoded_text)
 
 
     # Apply Qwen3 chat template
-    def apply_chat_template(
-        self,
-        messages,
-        tools=None,
-        add_generation_prompt=False,
-        enable_thinking=None
-    ):
+    def apply_chat_template(self, messages, tools=None, add_generation_prompt=False, enable_thinking=None):
 
         if not self.chat_template:
             raise ValueError("No chat template found in tokenizer configuration")
 
         if self.chat_template_renderer is None:
-            raise ImportError(
-                "Jinja2 is required for chat formatting. Install it using: pip install jinja2"
-            )
+            raise ImportError("Jinja2 is required for chat formatting. Install it using: pip install jinja2")
 
         # Support a single user message
         if isinstance(messages, str):
-            messages = [
-                {"role": "user", "content": messages}
-            ]
+            messages = [{"role": "user", "content": messages}]
 
         if not isinstance(messages, (list, tuple)) or not messages:
             raise ValueError("messages must be a non-empty list or string")
@@ -507,13 +439,7 @@ class Qwen3Tokenizer:
 
 
     # Wrap a single user message (previous interface)
-    def _wrap_chat(
-        self,
-        user_msg,
-        add_generation_prompt=None,
-        enable_thinking=None,
-        tools=None
-    ):
+    def _wrap_chat(self, user_msg, add_generation_prompt=None, enable_thinking=None, tools=None):
 
         if add_generation_prompt is None:
             add_generation_prompt = self.default_add_generation_prompt
@@ -530,48 +456,26 @@ class Qwen3Tokenizer:
 
 
     # Format a conversation and encode it
-    def encode_chat(
-        self,
-        user_msg,
-        add_generation_prompt=True,
-        enable_thinking=False,
-        tools=None
-    ):
+    def encode_chat(self, user_msg, add_generation_prompt=True, enable_thinking=False, tools=None):
 
         # Support both a string and a list of messages
         if isinstance(user_msg, str):
 
-            formatted_text = self._wrap_chat(
-                user_msg,
-                add_generation_prompt=add_generation_prompt,
-                enable_thinking=enable_thinking,
-                tools=tools
-            )
+            formatted_text = self._wrap_chat(user_msg, add_generation_prompt=add_generation_prompt, enable_thinking=enable_thinking, tools=tools)
 
         else:
 
-            formatted_text = self.apply_chat_template(
-                user_msg,
-                tools=tools,
-                add_generation_prompt=add_generation_prompt,
-                enable_thinking=enable_thinking
-            )
+            formatted_text = self.apply_chat_template(user_msg, tools=tools, add_generation_prompt=add_generation_prompt, enable_thinking=enable_thinking)
 
         return self.encode(formatted_text, chat_wrapped=False)
 
 
     # Batch encoding, padding and attention masks
-    def encode_batch(
-        self,
-        texts,
-        padding=True,
-        truncation=False,
-        max_length=None,
-        return_attention_mask=True,
+    def encode_batch(self, texts, padding=True, truncation=False, max_length=None, 
+        return_attention_mask=True, 
         padding_side=None,
         truncation_side=None,
-        pad_to_multiple_of=None
-    ):
+        pad_to_multiple_of=None):
 
         if isinstance(texts, str) or not isinstance(texts, (list, tuple)):
             raise TypeError("encode_batch() expects a list or tuple of strings")
@@ -624,20 +528,13 @@ class Qwen3Tokenizer:
                 raise ValueError("max_length must be a positive integer")
 
         if padding == "max_length" and max_length is None:
-            raise ValueError(
-                "max_length is required when padding='max_length'"
-            )
+            raise ValueError("max_length is required when padding='max_length'")
 
         if padding in (False, None) and pad_to_multiple_of is not None:
-            raise ValueError(
-                "pad_to_multiple_of requires padding to be enabled"
-            )
+            raise ValueError("pad_to_multiple_of requires padding to be enabled")
 
         # Batch inputs are raw texts unless explicitly wrapped before calling this method.
-        sequences = [
-            self.encode(text, chat_wrapped=False)
-            for text in texts
-        ]
+        sequences = [self.encode(text, chat_wrapped=False) for text in texts]
 
         # Truncate sequences if required
         if truncation:
@@ -668,10 +565,7 @@ class Qwen3Tokenizer:
         # Pad to a multiple if requested
         if target_length is not None and pad_to_multiple_of is not None:
 
-            target_length = (
-                (target_length + pad_to_multiple_of - 1)
-                // pad_to_multiple_of
-            ) * pad_to_multiple_of
+            target_length = ((target_length + pad_to_multiple_of - 1) // pad_to_multiple_of) * pad_to_multiple_of
 
         # Pad sequences and construct attention masks
         input_ids = []
@@ -686,16 +580,12 @@ class Qwen3Tokenizer:
                 pad_length = target_length - len(sequence)
 
                 if pad_length < 0:
-                    raise ValueError(
-                        "A sequence exceeds the padding length. Enable truncation."
-                    )
+                    raise ValueError("A sequence exceeds the padding length. Enable truncation.")
 
                 if pad_length > 0:
 
                     if self.pad_token_id is None:
-                        raise ValueError(
-                            "No padding token ID found in tokenizer configuration"
-                        )
+                        raise ValueError("No padding token ID found in tokenizer configuration")
 
                     pad_tokens = [self.pad_token_id] * pad_length
                     pad_mask = [0] * pad_length
@@ -711,9 +601,7 @@ class Qwen3Tokenizer:
             input_ids.append(sequence)
             attention_masks.append(mask)
 
-        result = {
-            "input_ids": input_ids
-        }
+        result = {"input_ids": input_ids}
 
         if return_attention_mask:
             result["attention_mask"] = attention_masks
@@ -774,27 +662,16 @@ if __name__ == "__main__":
     assert decoded_text == normalize_text(text)
 
     # Skip special tokens
-    print(
-        "\nDecoded without special tokens:",
-        tokenizer.decode(token_ids, skip_special_tokens=True)
-    )
+    print("\nDecoded without special tokens:", tokenizer.decode(token_ids, skip_special_tokens=True))
 
     # Chat formatting
     messages = [
         {"role": "user", "content": "What is reinforcement learning?"}
     ]
 
-    formatted_text = tokenizer.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        enable_thinking=False
-    )
+    formatted_text = tokenizer.apply_chat_template(messages, add_generation_prompt=True, enable_thinking=False)
 
-    chat_token_ids = tokenizer.encode_chat(
-        messages,
-        add_generation_prompt=True,
-        enable_thinking=False
-    )
+    chat_token_ids = tokenizer.encode_chat(messages, add_generation_prompt=True, enable_thinking=False)
 
     print("\nFormatted chat:")
     print(formatted_text)
@@ -804,27 +681,14 @@ if __name__ == "__main__":
     assert tokenizer.decode(chat_token_ids) == normalize_text(formatted_text)
 
     # Previous single-message interface
-    chat_ids = tokenizer.encode_chat(
-        user_msg="Explain PPO.",
-        add_generation_prompt=True,
-        enable_thinking=False
-    )
+    chat_ids = tokenizer.encode_chat(user_msg="Explain PPO.", add_generation_prompt=True, enable_thinking=False)
 
     print("\nSingle-message chat IDs:", chat_ids)
 
     # Batch encoding and padding
-    texts = [
-        "Hello",
-        "How are you?",
-        "Explain reinforcement learning."
-    ]
+    texts = ["Hello", "How are you?", "Explain reinforcement learning."]
 
-    batch = tokenizer.encode_batch(
-        texts,
-        padding=True,
-        truncation=True,
-        max_length=128
-    )
+    batch = tokenizer.encode_batch(texts, padding=True, truncation=True, max_length=128)
 
     print("\nBatch input IDs:", batch["input_ids"])
     print("Attention masks:", batch["attention_mask"])
