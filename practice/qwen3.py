@@ -11,7 +11,6 @@
 # make informed architectural and implementation decisions.
 
 import jax
-from flax import linen as nn
 import jax.numpy as jnp
 
 
@@ -222,8 +221,8 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     # now concat over, last_axis
     query_rotated = jnp.concatenate([q1_prime, q2_prime], axis=-1) #shape: [B,T,16,128]
     key_rotated = jnp.concatenate([k1_prime, k2_prime], axis=-1) #shape: [B,T,8,128]
-    query_rotated = query_rotated.astype(jnp.float16)  #Bf16 #Shape: [B,T,16,128]
-    key_rotated = key_rotated.astype(jnp.float16)  #Bf16 # Shape: [B,T,8,128]
+    query_rotated = query_rotated.astype(jnp.bfloat16)  #Bf16 #Shape: [B,T,16,128]
+    key_rotated = key_rotated.astype(jnp.bfloat16)  #Bf16 # Shape: [B,T,8,128]
 
     #group-query attention -Self attention block
     num_query_heads = 16
@@ -237,7 +236,7 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     key_for_scores = key_for_scores[:,:,None,:,:] #[B,8,128,T] --> [B,8,1,128,T]
 
     #dot product
-    attention_scores = (query_for_scores @ key_for_scores) / jnp.sqrt(head_dim) #shape: [B,8,2,T,T]
+    attention_scores = jnp.matmul(query_for_scores, key_for_scores, preferred_element_type=jnp.float32) / jnp.sqrt(jnp.float32(head_dim)) #shape: [B,8,2,T,T], fp32
 
     #causal_masking
     B,_,_,T,T = attention_scores.shape
@@ -291,13 +290,13 @@ def RMSNorm(x, gamma, eps=1e-6):
     forward flops are almost = 28 * B * T * 4D
     backward flops are almost = 28 * B * T * 8D
     """
+    input_dtype = x.dtype
     x = x.astype(jnp.float32) # we have to get this into float32 precision to sustain the precision,
     temp_val = jnp.mean(jnp.square(x), axis=-1, keepdims=True) #eps added before,
     temp_val = temp_val + eps
-    rms = jnp.sqrt(temp_val) # taking sqrt
-    result = (x / rms) * gamma
-    result = result.astype(jnp.bfloat16)
-    return result #input_shape = output_shape
+    normed = x * jax.lax.rsqrt(temp_val) # x / sqrt(mean(x^2)+eps)
+    normed = normed.astype(input_dtype)   # cast back first (this is what HF Qwen3RMSNorm does) ...
+    return gamma * normed                 # ... then scale by the learnable weight. input_shape = output_shape
 
 
 
@@ -381,35 +380,33 @@ def qwen3_model(input_ids, params, rope_theta):
     #save the token_embedding as ---hidden states -> it will be later overridden
     hidden_states = token_embedding #shape: [B,T,1024]
 
-    # get the size of the layers
-    num_layers = params["layers"]["q_proj"].shape[0]
-
-
-    for i in range(num_layers):
-
-        #select the parameters belonging to layer[i]
-        layer_params = jax.tree_util.tree_map(lambda weight:weight[i], params["layers"])
-
-        hidden_states = transformer_layer(
-            hidden_states,
-            layer_params["input_layernorm"],
-            layer_params["q_proj"],
-            layer_params["k_proj"],
-            layer_params["v_proj"],
-            layer_params["q_norm"],
-            layer_params["k_norm"],
-            layer_params["o_proj"],
-            layer_params["post_attention_layernorm"],
-            layer_params["gate_proj"],
-            layer_params["up_proj"],
-            layer_params["down_proj"],
-            rope_theta
+    # The layer weights are stacked along axis 0 ([28, ...]) so we can scan over them:
+    # jax.lax.scan slices layer i out of every leaf of the pytree and compiles the layer body ONCE,
+    # instead of unrolling 28 copies in Python.
+    def layer_step(h, lp):
+        h_new = transformer_layer(
+            h,
+            lp["input_layernorm"],
+            lp["q_proj"],
+            lp["k_proj"],
+            lp["v_proj"],
+            lp["q_norm"],
+            lp["k_norm"],
+            lp["o_proj"],
+            lp["post_attention_layernorm"],
+            lp["gate_proj"],
+            lp["up_proj"],
+            lp["down_proj"],
+            rope_theta,
         )  #shape: [B,T,1024]
+        return h_new.astype(h.dtype), None   # carry dtype must not change inside scan
+
+    hidden_states, _ = jax.lax.scan(layer_step, hidden_states, params["layers"])
 
     #final RMSNorm
     final_rms_norm = RMSNorm(hidden_states, params["final_norm"]) #[B,T,1024]
 
     # linear-layer  --->  lm_head
-    logits =  final_rms_norm @ jnp.transpose(params["embed_tokens"]) #shapes: [B,T,1024] @ [151936,1024]T  =>  [B,T,151936]
+    logits = jnp.matmul(final_rms_norm, jnp.transpose(params["embed_tokens"]), preferred_element_type=jnp.float32) #[B,T,1024] @ [1024,151936] => [B,T,151936] (fp32 logits)
 
     return logits  # output_shape =  [B,T,151936]

@@ -1,5 +1,5 @@
 # Qwen3 Tokenizer: Byte-Level BPE Implementation
-
+# written by llms mostly --I wrote 30% of it...
 import unicodedata
 import regex
 import re
@@ -306,8 +306,15 @@ class Qwen3Tokenizer:
 
         # compile the Jinja chat template once, so it can be rendered many times
         if self.chat_template and Environment is not None:
-            self.chat_template_renderer = Environment(
-                autoescape=False).from_string(self.chat_template)
+            # trim_blocks / lstrip_blocks match HF's chat-template environment, otherwise stray
+            # newlines/spaces change the prompt and therefore the token ids
+            env = Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True)
+
+            def raise_exception(message):
+                raise ValueError(message)
+
+            env.globals["raise_exception"] = raise_exception
+            self.chat_template_renderer = env.from_string(self.chat_template)
 
         # Split around all added tokens, longest first
         added_token_strings = sorted(self.added_token_to_id, key=len, reverse=True)
@@ -873,3 +880,4 @@ if __name__ == "__main__":
     assert len(set(lengths)) == 1
 
     print("\nAll tokenizer tests passed!")
+    
