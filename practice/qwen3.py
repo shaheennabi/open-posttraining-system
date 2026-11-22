@@ -224,6 +224,9 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     query_rotated = query_rotated.astype(jnp.bfloat16)  #Bf16 #Shape: [B,T,16,128]
     key_rotated = key_rotated.astype(jnp.bfloat16)  #Bf16 # Shape: [B,T,8,128]
 
+    #kv-cache here.
+
+
     #group-query attention -Self attention block
     num_query_heads = 16
     num_kv_heads = 8
