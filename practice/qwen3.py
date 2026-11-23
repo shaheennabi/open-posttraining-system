@@ -12,7 +12,7 @@
 
 import jax
 import jax.numpy as jnp
-
+from practice.kv_cache import KVCache
 
 def Embedding(input, embedding_weight):
     """
@@ -33,13 +33,16 @@ def Embedding(input, embedding_weight):
 
 
 
-def transformer_layer(x, input_rms_norm_weight, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight, post_attention_norm_weight, gate_proj_weight, up_proj_weight, down_proj_weight, rope_theta):
+def transformer_layer(x, input_rms_norm_weight, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight, post_attention_norm_weight, gate_proj_weight, up_proj_weight, down_proj_weight, layer_key_cache, layer_value_cache, cache_position, rope_theta):
 
     # getting the normalized_output
     input_rms_norm = RMSNorm(x, input_rms_norm_weight) # shape: [B,T,1024]
 
     #  getting attention_output
-    attention_output = self_attention_block(input_rms_norm, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight, rope_theta)
+    attention_output, updated_key_cache, updated_value_cache = self_attention_block(
+        input_rms_norm, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight,
+        layer_key_cache, layer_value_cache, cache_position, rope_theta,
+    ) # layer caches: [B,C,8,128] each
 
     # residual connection
     residual_added = x + attention_output #shape: x=[B,T,1024] + attention_output=[B,T,1024] => residual_added = [B,T,1024]
@@ -53,11 +56,11 @@ def transformer_layer(x, input_rms_norm_weight, q_weight, k_weight, v_weight, q_
     # mlp residual-connection
     transformer_layer_output = residual_added + feedforward_network_output  #shapes: [B,T,1024] + [B,T,1024] --> [B,T,1024]
 
-    return transformer_layer_output  #shape: [B,T,1024]
+    return transformer_layer_output, updated_key_cache, updated_value_cache #shape: [B,T,1024], #[B,C,8,128], #[B,C,8,128]
 
 
 
-def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight, rope_theta=10000): #q_weight = [2048,1024], k_weight = [1024,1024], v_weight = [1024,1024]
+def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_weight, o_proj_weight, layer_key_cache, layer_value_cache, cache_position, rope_theta=10000): #q_weight = [2048,1024], k_weight = [1024,1024], v_weight = [1024,1024]
     """
         Projection:
         q_proj.weight = [2048, 1024] # output_features, input_features
@@ -172,7 +175,7 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     """
 
 
-    B,T,d_model = x.shape
+    B,T,_ = x.shape
     # qkv projections
     query_proj =  x @ jnp.transpose(q_weight)  #XQ^T Shape: [B,T,2048]
     key_proj = x @ jnp.transpose(k_weight) #XK^T Shape: [B,T,1024]
@@ -200,7 +203,7 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     inv_freq = rope_theta ** (-pairs / head_dim) #shape: [64] # this is the inverse frequency, we will multiply with token positions to get their angles,
 
     # get the token positions
-    positions = jnp.arange(T, dtype=jnp.float32) #shape: [T]
+    positions = cache_position + jnp.arange(T, dtype=jnp.float32) #shape: [T]
     angle =  positions[:, None] * inv_freq[None, :] # shape: positions=[T,1] * inv_freq=[1,64] --> angle=[T,64]
 
     # now get cosine and sin for angle
@@ -225,6 +228,18 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     key_rotated = key_rotated.astype(jnp.bfloat16)  #Bf16 # Shape: [B,T,8,128]
 
     #kv-cache here.
+    use_cache = layer_key_cache is not None
+    if use_cache:
+        indices = cache_position + jnp.arange(T) # absolute slots of the T new tokens, shape: [T]
+
+        layer_key_cache = layer_key_cache.at[:, indices, :, :].set(key_rotated.astype(layer_key_cache.dtype))  # [B, C, 8, 128]
+        layer_value_cache = layer_value_cache.at[:, indices, :, :].set(value.astype(layer_value_cache.dtype)) # [B, C, 8, 128]
+
+        key_cached = layer_key_cache  #[B, C, 8, 128]
+        value_cached = layer_value_cache  #[B, C, 8, 128]
+    else:
+        key_cached = key_rotated  #[B, T, 8, 128]  (no cache -> attend only to the current tokens)
+        value_cached = value  #[B, T, 8, 128]
 
 
     #group-query attention -Self attention block
@@ -235,17 +250,21 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     # reshape q into groups
     query_reshaped = query_rotated.reshape(B,T,num_kv_heads,group_size,head_dim) #shape: [B,T,8,2,128]
     query_for_scores = jnp.transpose(query_reshaped, axes=[0,2,3,1,4]) #[B,8,2,T,128]
-    key_for_scores = jnp.transpose(key_rotated, axes=[0,2,3,1]) #[B,8,128,T]
-    key_for_scores = key_for_scores[:,:,None,:,:] #[B,8,128,T] --> [B,8,1,128,T]
+    key_for_scores = jnp.transpose(key_cached, axes=[0,2,3,1]) #[B,8,128,C]
+    key_for_scores = key_for_scores[:,:,None,:,:] #[B,8,128,T] --> [B,8,1,128,C]
 
     #dot product
-    attention_scores = jnp.matmul(query_for_scores, key_for_scores, preferred_element_type=jnp.float32) / jnp.sqrt(jnp.float32(head_dim)) #shape: [B,8,2,T,T], fp32
+    attention_scores = jnp.matmul(query_for_scores, key_for_scores, preferred_element_type=jnp.float32) / jnp.sqrt(jnp.float32(head_dim)) #shape: [B,8,2,T,C], fp32
 
     #causal_masking
-    B,_,_,T,T = attention_scores.shape
+    B,_,_,T,C = attention_scores.shape
 
-    mask = jnp.tril(jnp.ones((T,T), dtype=bool)) #shape: [T,T]
-    attention_scores = jnp.where(mask[None,None,None,:,:], attention_scores, -jnp.inf) #shape: [B,8,2,T,T]
+    #query absolute positions
+    query_positions = cache_position + jnp.arange(T) # cached_position + T tokens
+    key_positions = jnp.arange(C) # C (slots not written yet are masked out here, since their position > every query position)
+    mask = key_positions[None, :] <= query_positions[:, None]
+
+    attention_scores = jnp.where(mask[None,None,None,:,:], attention_scores, -jnp.inf) #shape: [B,8,2,T,C]
     attention_scores = attention_scores.astype(jnp.float32)
 
     #softmax
@@ -253,14 +272,14 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     shifted_scores = attention_scores - max_scores
     exp_scores = jnp.exp(shifted_scores)
     sum_exp_scores = jnp.sum(exp_scores, axis=-1, keepdims=True)
-    attention_probs = exp_scores / sum_exp_scores #shape: [B,8,2,T,T]
-    attention_probs = attention_probs.astype(jnp.bfloat16) #shape: [B,8,2,T,T]
+    attention_probs = exp_scores / sum_exp_scores #shape: [B,8,2,T,C]
+    attention_probs = attention_probs.astype(jnp.bfloat16) #shape: [B,8,2,T,C]
 
     #multiply with Value
-    value = value[:,:,:,None,:] #shape: [B,T,8,128] -->  [B,T,8,1,128]
-    value = jnp.transpose(value, axes=[0,2,3,1,4]) #shape: [B,8,1,T,128]
+    value_for_attention = value_cached[:,:,:,None,:] #shape: [B,C,8,128] -->  [B,C,8,1,128]
+    value_for_attention = jnp.transpose(value_for_attention, axes=[0,2,3,1,4]) #shape: [B,8,1,C,128]
 
-    attention_output = attention_probs @ value #shape: [B,8,2,T,T] @ [B,8,1,T,128] = [B,8,2,T,128]
+    attention_output = attention_probs @ value_for_attention #shape: [B,8,2,T,C] @ [B,8,1,C,128] = [B,8,2,T,128]
 
     attention_output = jnp.transpose(attention_output, axes=[0,3,1,2,4])  #shape: [B,T,8,2,128]
     output = attention_output.reshape(B,T,num_kv_heads*group_size,head_dim) #shape: [B,T,16,128]
@@ -270,7 +289,9 @@ def self_attention_block(x, q_weight, k_weight, v_weight, q_norm_weight, k_norm_
     output =  output.reshape(B,T,num_query_heads*head_dim) #shape: [B,T,2048]
     final_output = output @ jnp.transpose(o_proj_weight) #shape: [B,T,2048] * [2048,1024] -> [B,T,1024]
 
-    return final_output   # [B,T,1024]
+    if not use_cache:
+        return final_output, None, None
+    return final_output, key_cached, value_cached   # [B,T,1024], # [B, C, 8, 128], # [B, C, 8, 128]
 
 
 
@@ -364,7 +385,7 @@ def silu_activation(x):
 
 # Main model — Qwen3 architecture
 
-def qwen3_model(input_ids, params, rope_theta):
+def qwen3_model(input_ids, params, key_cache, value_cache, cache_position, rope_theta): #key_cache and value_cache: shape: [28, B, C, 8, 128]
     """
         LM head = Weight: [151936, 1024] (transposed)
         Forward FLOPs:
@@ -386,8 +407,9 @@ def qwen3_model(input_ids, params, rope_theta):
     # The layer weights are stacked along axis 0 ([28, ...]) so we can scan over them:
     # jax.lax.scan slices layer i out of every leaf of the pytree and compiles the layer body ONCE,
     # instead of unrolling 28 copies in Python.
-    def layer_step(h, lp):
-        h_new = transformer_layer(
+    def layer_step(h, layer_inputs):
+        lp, layer_key_cache, layer_value_cache = layer_inputs  # layer_*_cache: [B,C,8,128] (one layer sliced out of [28,B,C,8,128])
+        h_new, updated_key_cache, updated_value_cache = transformer_layer(
             h,
             lp["input_layernorm"],
             lp["q_proj"],
@@ -400,11 +422,14 @@ def qwen3_model(input_ids, params, rope_theta):
             lp["gate_proj"],
             lp["up_proj"],
             lp["down_proj"],
+            layer_key_cache,
+            layer_value_cache,
+            cache_position,
             rope_theta,
         )  #shape: [B,T,1024]
-        return h_new.astype(h.dtype), None   # carry dtype must not change inside scan
+        return h_new.astype(h.dtype), (updated_key_cache, updated_value_cache)
 
-    hidden_states, _ = jax.lax.scan(layer_step, hidden_states, params["layers"])
+    hidden_states, (key_cache, value_cache) = jax.lax.scan(layer_step, hidden_states, (params["layers"], key_cache, value_cache))
 
     #final RMSNorm
     final_rms_norm = RMSNorm(hidden_states, params["final_norm"]) #[B,T,1024]
@@ -412,4 +437,4 @@ def qwen3_model(input_ids, params, rope_theta):
     # linear-layer  --->  lm_head
     logits = jnp.matmul(final_rms_norm, jnp.transpose(params["embed_tokens"]), preferred_element_type=jnp.float32) #[B,T,1024] @ [1024,151936] => [B,T,151936] (fp32 logits)
 
-    return logits  # output_shape =  [B,T,151936]
+    return logits, key_cache, value_cache  # output_shape =  [B,T,151936], [B,C,8,128], [B,C,8,128]

@@ -1,35 +1,85 @@
-
+import jax
 import jax.numpy as jnp
 
 
-def init_kv_cache(batch_size, max_seq_len):
-    # [28, B, max_seq_len, 8, 128]
-    cache_shape = (28, batch_size, max_seq_len, 8, 128)
+@jax.jit
+def write_cache(key_cache, value_cache, new_key, new_value, cache_position):
+    T = new_key.shape[2]
 
-    key_cache = jnp.zeros(cache_shape, dtype=jnp.bfloat16)
-    value_cache = jnp.zeros(cache_shape, dtype=jnp.bfloat16)
+    indices = cache_position + jnp.arange(T)
 
-    return key_cache, value_cache
-
-
-def update_kv_cache(key_cache, value_cache, new_key, new_value, cache_position):
-    # key_cache:   [28, B, max_seq_len, 8, 128]
-    # value_cache: [28, B, max_seq_len, 8, 128]
-    # new_key:     [28, B, T, 1024]
-    # new_value:   [28, B, T, 1024]
-
-    B, T, _ = new_key.shape[1:]
-
-    new_key = new_key.reshape(28, B, T, 8, 128)
-    # new_key: [28, B, T, 8, 128]
-
-    new_value = new_value.reshape(28, B, T, 8, 128)
-    # new_value: [28, B, T, 8, 128]
-
-    cache_indices = cache_position + jnp.arange(T)
-    # cache_indices: [T]
-
-    key_cache = key_cache.at[:, :, cache_indices, :, :].set(new_key)
-    value_cache = value_cache.at[:, :, cache_indices, :, :].set(new_value)
+    key_cache = key_cache.at[:, :, indices, :, :].set(new_key)
+    value_cache = value_cache.at[:, :, indices, :, :].set(new_value)
 
     return key_cache, value_cache
+
+
+class KVCache:
+    def __init__(self, n_layers=28, batch_size=1, num_kv_heads=8, head_dim=128, initial_capacity=128, dtype=jnp.bfloat16):
+        self.n_layers = n_layers
+        self.batch_size = batch_size
+        self.num_kv_heads = num_kv_heads
+        self.head_dim = head_dim
+        self.dtype = dtype
+
+        self.capacity = initial_capacity
+        self.cache_size = 0
+        self.key_cache, self.value_cache = self.init_cache()
+
+    def init_cache(self, capacity=None):
+        if capacity is None:
+            capacity = self.capacity
+
+        cache_shape = (self.n_layers, self.batch_size, capacity, self.num_kv_heads, self.head_dim) #[28, 1, 128, 8, 128]
+
+        key_cache = jnp.zeros(cache_shape, dtype=self.dtype)
+        value_cache = jnp.zeros(cache_shape, dtype=self.dtype)
+
+        return key_cache, value_cache
+
+    def grow_cache(self):
+        new_capacity = self.capacity * 2
+        new_key_cache, new_value_cache = self.init_cache(new_capacity)
+
+        new_key_cache = new_key_cache.at[:, :, :self.cache_size, :, :].set(self.key_cache[:, :, :self.cache_size, :, :])
+        new_value_cache = new_value_cache.at[:, :, :self.cache_size, :, :].set(self.value_cache[:, :, :self.cache_size, :, :])
+
+        self.key_cache = new_key_cache
+        self.value_cache = new_value_cache
+        self.capacity = new_capacity
+
+    def ensure_capacity(self, T):
+        # call BEFORE the model forward, so the cache has room for T new tokens
+        while self.cache_size + T > self.capacity:
+            self.grow_cache()
+
+    def set_cache(self, key_cache, value_cache, T):
+        # call AFTER the model forward, with the caches returned by qwen3_model
+        # key_cache / value_cache: [n_layers, B, capacity, num_kv_heads, head_dim]
+        self.key_cache = key_cache
+        self.value_cache = value_cache
+        self.cache_size += T
+
+    def update_kv_cache(self, new_key, new_value):
+        if new_key.ndim == 4:
+            T = new_key.shape[2]
+            new_key = new_key.reshape(self.n_layers, self.batch_size, T, self.num_kv_heads, self.head_dim)
+
+            new_value = new_value.reshape(self.n_layers, self.batch_size, T, self.num_kv_heads, self.head_dim)
+        else:
+            T = new_key.shape[2]
+
+        self.ensure_capacity(T)
+
+        new_key = new_key.astype(self.dtype)
+        new_value = new_value.astype(self.dtype)
+
+        self.key_cache, self.value_cache = write_cache(self.key_cache, self.value_cache, new_key, new_value, self.cache_size)
+
+        self.cache_size += T
+        return self.get_kv_cache()
+
+    def get_kv_cache(self):
+        key_cache = self.key_cache[:, :, :self.cache_size, :, :]
+        value_cache = self.value_cache[:, :, :self.cache_size, :, :]
+        return key_cache, value_cache
