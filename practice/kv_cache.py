@@ -2,17 +2,6 @@ import jax
 import jax.numpy as jnp
 
 
-@jax.jit
-def write_cache(key_cache, value_cache, new_key, new_value, cache_position):
-    T = new_key.shape[2]
-
-    indices = cache_position + jnp.arange(T)
-
-    key_cache = key_cache.at[:, :, indices, :, :].set(new_key)
-    value_cache = value_cache.at[:, :, indices, :, :].set(new_value)
-
-    return key_cache, value_cache
-
 
 class KVCache:
     def __init__(self, n_layers=28, batch_size=1, num_kv_heads=8, head_dim=128, initial_capacity=128, dtype=jnp.bfloat16):
@@ -25,6 +14,7 @@ class KVCache:
         self.capacity = initial_capacity
         self.cache_size = 0
         self.key_cache, self.value_cache = self.init_cache()
+
 
     def init_cache(self, capacity=None):
         if capacity is None:
@@ -60,24 +50,6 @@ class KVCache:
         self.value_cache = value_cache
         self.cache_size += T
 
-    def update_kv_cache(self, new_key, new_value):
-        if new_key.ndim == 4:
-            T = new_key.shape[2]
-            new_key = new_key.reshape(self.n_layers, self.batch_size, T, self.num_kv_heads, self.head_dim)
-
-            new_value = new_value.reshape(self.n_layers, self.batch_size, T, self.num_kv_heads, self.head_dim)
-        else:
-            T = new_key.shape[2]
-
-        self.ensure_capacity(T)
-
-        new_key = new_key.astype(self.dtype)
-        new_value = new_value.astype(self.dtype)
-
-        self.key_cache, self.value_cache = write_cache(self.key_cache, self.value_cache, new_key, new_value, self.cache_size)
-
-        self.cache_size += T
-        return self.get_kv_cache()
 
     def get_kv_cache(self):
         key_cache = self.key_cache[:, :, :self.cache_size, :, :]

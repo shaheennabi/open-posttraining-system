@@ -12,7 +12,6 @@
 
 import jax
 import jax.numpy as jnp
-from practice.kv_cache import KVCache
 
 def Embedding(input, embedding_weight):
     """
