@@ -1,64 +1,73 @@
-# Open Post Training
+# Open Post-Training System
 
-**Open Post-Training System** is a JAX/TPU-native agent-swarm reinforcement-learning infrastructure project for long-horizon cybersecurity and social-engineering research. It also explores how culture and technology access shape interactions with AI, including research involving low-literacy and underserved communities. The project is being built from model loading and inference utilities toward a complete training and evaluation system.
+An open research codebase exploring how to build post-training infrastructure for long-horizon, multi-agent tasks. The project is being developed from the model layer upward, beginning with a hands-on JAX implementation of Qwen3-0.6B.
 
 ## Current status
 
-The project is actively under development. The most complete part today is the learning and inference workflow around Qwen3 models. The larger post-training architecture is laid out, but it is not yet a production-ready end-to-end training platform.
+The Qwen3 model-loading and inference path is the most developed part of the repository. The broader agent, rollout, environment, reward, and learner architecture is being scaffolded; it is not yet a complete end-to-end reinforcement-learning system.
 
-## What is implemented
+### Implemented so far
 
-- **Model and tokenizer workflow:** utilities for downloading model files, loading Qwen3 configurations and weights, and working with tokenizers.
-- **Text generation:** a working generation path for pretrained models, including sampling and generation helpers.
-- **KV-cached inference:** a KV cache implementation and a cached text-generation path for faster autoregressive generation.
-- **Reasoning evaluation:** scripts and notebooks for running reasoning-model experiments on MATH-500, including result files and metric analysis.
-- **Inference-time scaling:** examples for chain-of-thought, self-consistency, temperature scaling, and comparing inference strategies.
-- **Project foundations:** initial interfaces and modules for agents, trajectories, rollouts, rewards, environments, distributed actors, evaluation, and checkpointing.
-- **Research experiments:** exploratory work on GRPO and representation analysis, including the latest Qwen3-0.6B study.
+- **Qwen3-0.6B forward model:** JAX implementation of the decoder model, including grouped-query attention, RoPE, RMSNorm/QK-Norm, and the gated MLP.
+- **Checkpoint loading:** loads local Qwen3 safetensors and stacks transformer-layer weights for the JAX model.
+- **Tokenizer and generation:** local Qwen3 tokenizer, autoregressive generation, and a growing KV cache.
+- **Pallas experiment:** a standalone flash-attention prototype exists, but is not connected to the Qwen3 forward path.
+- **System structure:** initial directories for agents, environments, tasks, rollouts, rewards, algorithms, distributed training, evaluation, and checkpointing.
 
-## What is still in progress
+### Still in progress
 
-- Connecting the agent, rollout, reward, environment, and learner modules into one reliable end-to-end training loop.
-- Completing the GRPO, PPO, and SFT algorithm implementations.
-- Adding robust checkpointing, configuration management, distributed execution, and recovery workflows.
-- Expanding coding-agent environments, verifiers, benchmarks, and automated tests.
-- Improving reproducibility, documentation, examples, and performance across hardware setups.
+- Connecting agents, environments, rollout collection, rewards, and a learner into a training loop.
+- Implementing the Countdown environment and supplying its train and held-out task data.
+- Implementing training algorithms and validating their gradients and behavior.
+- Building distributed execution, checkpointing, and task-specific evaluation.
+
+Directories and files for these planned components are scaffolding, not claims that those components are already implemented.
 
 ## Repository layout
 
 | Area | Purpose |
 | --- | --- |
-| `agents/` | Agent execution loops, context management, and tool registration |
-| `algorithms/` | Losses and planned post-training algorithms |
 | `core/` | Shared configuration, protocols, trajectories, and types |
+| `environments/` | Environment interfaces, sandbox, and planned task environments |
+| `agents/` | Agent execution, context, tools, and action parsing |
+| `tasks/` | Training and held-out task data |
+| `rollouts/` | Sampling, workers, scheduling, and collection |
+| `models/` | Qwen3 implementation, tokenizer, KV cache, policy loading, and adapters |
+| `algorithms/` | Losses and planned post-training algorithms |
 | `distributed/` | Actor, learner, communication, and synchronization components |
-| `evaluation/` | Benchmarks, metrics, and analysis utilities |
-| `learning/` | Guided model-loading, generation, evaluation, and reasoning experiments |
-| `models/`, `practice/` | Model interfaces and hands-on Qwen3 implementations |
-| `rewards/`, `rollouts/`, `environments/` | Building blocks for reinforcement-learning experiments |
+| `rewards/` | Reward functions and verifiers |
+| `evaluation/` | Benchmarks, metrics, and analysis |
+| `checkpointing/` | Planned checkpoint management |
+| `configs/` | Model, rollout, environment, and training configuration |
+| `tests/` | Planned focused tests |
+| `notebooks/` | Exploratory notebooks |
 
 ## Getting started
 
-Install the project dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-For the most complete examples, start with the guides under [`learning/`](learning/), especially:
+Download Qwen3-0.6B assets into `models/qwen/`:
 
-- [`learning/downloading_the_base_model/`](learning/downloading_the_base_model/)
-- [`learning/base_model/`](learning/base_model/)
-- [`learning/generating_text_with_pre_trained_llm/`](learning/generating_text_with_pre_trained_llm/)
-- [`learning/evaluating_reasoning_models/`](learning/evaluating_reasoning_models/)
-- [`learning/improving_reasoning_with_inference_time_scaling/`](learning/improving_reasoning_with_inference_time_scaling/)
+```bash
+python -m models.download_model
+```
 
-## Recent research
+Run the local generation example:
 
-### Beyond Fixed Directions: Adaptive Representation Analysis of Reasoning and Memorization in LLMs
+```bash
+python -m models.text_generation
+```
 
-This work studies whether reasoning and memorization can be characterized by a single representation direction and whether that direction remains stable after reinforcement learning. Using Qwen3-0.6B and a controlled 400-example dataset, the study finds strong single-direction decodability while observing substantial geometric reorganization after RL.
+The downloaded model files are local assets and are not included in the repository. Model loading and generation require sufficient system memory.
 
-**Preprint:** https://arxiv.org/pdf/2608.21919
+## Project article
 
-Contributions and experiments are welcome as the system develops.
+The first article in the series describes the project’s starting point: choosing Qwen3-0.6B for constrained hardware, understanding its architecture from checkpoint weights, accounting for parameters and memory, and beginning a JAX implementation.
+
+[Building an Open Post-Training System: Starting with Qwen3-0.6B](https://shaheennabi.substack.com/p/open-post-training-system-a-jaxtpu)
+
+It is a progress report for the model-understanding and implementation stage, not a claim that the planned distributed RL system is complete.
