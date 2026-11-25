@@ -26,4 +26,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["logger*", "test*"]
+include = ["logger*", "test*", "models*"]

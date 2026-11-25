@@ -2,14 +2,9 @@ from pathlib import Path
 
 import jax.numpy as jnp
 
-if __package__:
-    from practice.kv_cache import KVCache
-    from practice.load_model import load_model
-    from practice.Qwen3_tokenizer import Qwen3Tokenizer
-else:
-    from kv_cache import KVCache
-    from load_model import load_model
-    from Qwen3_tokenizer import Qwen3Tokenizer
+from .kv_cache import KVCache
+from .policy import load_model
+from .tokenizer import Qwen3Tokenizer
 
 BUCKET = 64  # the prompt is right-padded to a multiple of this so the prefill step recompiles rarely
 
